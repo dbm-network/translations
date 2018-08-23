@@ -353,5 +353,10 @@
 	"About": "Over",
 	"Forums": "Forums",
 	"Language": "Taal",
-	"Theme": "Ontwerp"
+	"Theme": "Ontwerp",
+	"Search...": "Zoek...",
+	"Updating Discord Bot Maker Project!": "Updating Discord Bot Maker Project!",
+	"Please wait a couple minutes.": "Wacht alstublieft een paar minuten.",
+	"You can invite your bot to a server using the link below, or customize your own here:": "Je kunt je bot uitnodigen op een server via de onderstaande link, of je eigen hier aanpassen:",
+	"Default": "Standaard"
 }
