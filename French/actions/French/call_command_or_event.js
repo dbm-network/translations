@@ -14,7 +14,7 @@ name: "Executer commande/événement",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Autres",
+section: "Autre",
 
 //---------------------------------------------------------------------
 // Action Subtitle
