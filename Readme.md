@@ -12,5 +12,5 @@ Current Languages
 | **Deutsch**       	|                                                             	| 100%               	| 0%                	|                        	|
 | **Nederlands**    	|                                                             	| 100%               	| 0%                	|                        	|
 | **Spanish**       	|                                                             	| 100%               	| 0%                	|                        	|
-| **French**        	| With some Actions Translated, including a translated bot.js 	| 100%               	| ~80%              	| bot.js                 	|
+| **French**        	| With some Actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) 	| 100%               	| ~20%              	| bot.js                 	|
 | **Türkçe**        	|                                                             	| 100%               	| 0%                	|                        	|
