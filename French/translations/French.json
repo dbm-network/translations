@@ -193,7 +193,7 @@
 "Command Type:": "Type de commande:",
 "Normal Command": "Commande normale",
 "Includes Word": "Inclus un mot",
-"Matches Regular Expression": "Égale une regular expression",
+"Matches Regular Expression": "Égale une expression régulière",
 "Any Message": "Tout message",
 "None": "Aucun",
 "Server Only": "Serveur seulement",
