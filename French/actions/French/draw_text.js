@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Créer un rôle",
+name: "Dessiner du texte sur une image",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "Créer un rôle",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Contrôle de rôle",
+section: "Modification d'image",
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,19 +23,7 @@ section: "Contrôle de rôle",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `${data.roleName}`;
-},
-
-//---------------------------------------------------------------------
-// Action Storage Function
-//
-// Stores the relevant variable info for the editor.
-//---------------------------------------------------------------------
-
-variableStorage: function(data, varType) {
-	const type = parseInt(data.storage);
-	if(type !== varType) return;
-	return ([data.varName, 'Role']);
+	return `${data.text}`;
 },
 
 //---------------------------------------------------------------------
@@ -46,7 +34,7 @@ variableStorage: function(data, varType) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "varName"],
+fields: ["storage", "varName", "x", "y", "font", "width", "text"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -66,37 +54,33 @@ fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "va
 
 html: function(isEvent, data) {
 	return `
-Name:<br>
-<input id="roleName" class="round" type="text"><br>
-<div style="float: left; width: 50%;">
-	Afficher séparémment des utilis. en ligne:<br>
-	<select id="hoist" class="round" style="width: 90%;">
-		<option value="true">Oui</option>
-		<option value="false" selected>Non</option>
-	</select><br>
-	Mentionable:<br>
-	<select id="mentionable" class="round" style="width: 90%;">
-		<option value="true" selected>Oui</option>
-		<option value="false">Non</option>
-	</select><br>
-</div>
-<div style="float: right; width: 50%;">
-	Couleur:<br>
-	<input id="color" class="round" type="text" placeholder="Laisser vide pour par défaut."><br>
-	Position:<br>
-	<input id="position" class="round" type="text" placeholder="Laisser vide pour par défaut." style="width: 90%;"><br>
-</div>
 <div>
 	<div style="float: left; width: 35%;">
-		Stocker dans:<br>
-		<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
-			${data.variables[0]}
+		Image source:<br>
+		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
+			${data.variables[1]}
 		</select>
 	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
+	<div id="varNameContainer" style="float: right; width: 60%;">
 		Nom de la variable:<br>
-		<input id="varName" class="round" type="text"><br>
+		<input id="varName" class="round" type="text" list="variableList"><br>
 	</div>
+</div><br><br><br>
+<div style="float: left; width: 50%;">
+	URL de la police locale (.fnt):<br>
+	<input id="font" class="round" type="text" value="fonts/Asimov.fnt"><br>
+	Position en X:<br>
+	<input id="x" class="round" type="text" value="0"><br>
+</div>
+<div style="float: right; width: 50%;">
+	Largeur maximale:<br>
+	<input id="width" class="round" type="text" placeholder="Laisser vide pour aucun."><br>
+	Position en Y:<br>
+	<input id="y" class="round" type="text" value="0"><br>
+</div><br><br><br>
+<div>
+	Texte:<br>
+	<textarea id="text" rows="5" placeholder="Insérer le texte ici..." style="width: 99%; white-space: nowrap; resize: none;"></textarea>
 </div>`
 },
 
@@ -111,7 +95,7 @@ Name:<br>
 init: function() {
 	const {glob, document} = this;
 
-	glob.variableChange(document.getElementById('storage'), 'varNameContainer');
+	glob.refreshVariableList(document.getElementById('storage'));
 },
 
 //---------------------------------------------------------------------
@@ -123,30 +107,28 @@ init: function() {
 //---------------------------------------------------------------------
 
 action: function(cache) {
+	const Images = this.getDBM().Images;
 	const data = cache.actions[cache.index];
-	const server = cache.server;
-	const roleData = {};
-	if(data.roleName) {
-		roleData.name = this.evalMessage(data.roleName, cache);
-	}
-	if(data.color) {
-		roleData.color = this.evalMessage(data.color, cache);
-	}
-	if(data.position) {
-		roleData.position = parseInt(data.position);
-	}
-	roleData.hoist = JSON.parse(data.hoist);
-	roleData.mentionable = JSON.parse(data.mentionable);
-	if(server && server.createRole) {
-		const storage = parseInt(data.storage);
-		server.createRole(roleData).then(function(role) {
-			const varName = this.evalMessage(data.varName, cache);
-			this.storeValue(role, storage, varName, cache);
-			this.callNextAction(cache);
-		}.bind(this)).catch(this.displayError.bind(this, data, cache));
-	} else {
+	const storage = parseInt(data.storage);
+	const varName = this.evalMessage(data.varName, cache);
+	const image = this.getVariable(storage, varName, cache);
+	if(!image) {
 		this.callNextAction(cache);
+		return;
 	}
+	const fontName = this.evalMessage(data.font, cache);
+	const x = parseInt(this.evalMessage(data.x, cache));
+	const y = parseInt(this.evalMessage(data.y, cache));
+	const width = data.width ? parseInt(this.evalMessage(data.width, cache)) : null;
+	const text = this.evalMessage(data.text, cache);
+	Images.getFont(fontName).then(function(font) {
+		if(width) {
+			image.print(font, x, y, text, width);
+		} else {
+			image.print(font, x, y, text);
+		}
+		this.callNextAction(cache);
+	}.bind(this)).catch(this.displayError.bind(this, data, cache));
 },
 
 //---------------------------------------------------------------------

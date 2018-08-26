@@ -74,7 +74,7 @@ Nom:<br>
 </div>
 <div style="float: right; width: 50%;">
 	Position:<br>
-	<input id="position" class="round" type="text" placeholder="Leave blank for default!" style="width: 90%;"><br>
+	<input id="position" class="round" type="text" placeholder="Laisser vide pour pour par défaut." style="width: 90%;"><br>
 </div>
 <div>
 	<div style="float: left; width: 35%;">

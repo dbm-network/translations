@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Créer un rôle",
+name: "Convertir une liste en texte",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "Créer un rôle",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Contrôle de rôle",
+section: "Listes et boucles",
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,7 +23,8 @@ section: "Contrôle de rôle",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `${data.roleName}`;
+	const list = ['Server Members', 'Server Channels', 'Server Roles', 'Server Emojis', 'All Bot Servers', 'Mentioned User Roles', 'Command Author Roles', 'Temp Variable', 'Server Variable', 'Global Variable'];
+	return `Convertir ${list[parseInt(data.list)]} en texte`;
 },
 
 //---------------------------------------------------------------------
@@ -35,7 +36,7 @@ subtitle: function(data) {
 variableStorage: function(data, varType) {
 	const type = parseInt(data.storage);
 	if(type !== varType) return;
-	return ([data.varName, 'Role']);
+	return ([data.varName2, 'Text']);
 },
 
 //---------------------------------------------------------------------
@@ -46,7 +47,7 @@ variableStorage: function(data, varType) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "varName"],
+fields: ["list", "varName", "start", "middle", "end", "storage", "varName2"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -66,36 +67,42 @@ fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "va
 
 html: function(isEvent, data) {
 	return `
-Name:<br>
-<input id="roleName" class="round" type="text"><br>
-<div style="float: left; width: 50%;">
-	Afficher séparémment des utilis. en ligne:<br>
-	<select id="hoist" class="round" style="width: 90%;">
-		<option value="true">Oui</option>
-		<option value="false" selected>Non</option>
-	</select><br>
-	Mentionable:<br>
-	<select id="mentionable" class="round" style="width: 90%;">
-		<option value="true" selected>Oui</option>
-		<option value="false">Non</option>
-	</select><br>
-</div>
-<div style="float: right; width: 50%;">
-	Couleur:<br>
-	<input id="color" class="round" type="text" placeholder="Laisser vide pour par défaut."><br>
-	Position:<br>
-	<input id="position" class="round" type="text" placeholder="Laisser vide pour par défaut." style="width: 90%;"><br>
-</div>
 <div>
 	<div style="float: left; width: 35%;">
-		Stocker dans:<br>
-		<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
-			${data.variables[0]}
+		Liste source:<br>
+		<select id="list" class="round" onchange="glob.listChange(this, 'varNameContainer')">
+			${data.lists[isEvent ? 1 : 0]}
 		</select>
 	</div>
 	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
 		Nom de la variable:<br>
-		<input id="varName" class="round" type="text"><br>
+		<input id="varName" class="round" type="text" list="variableList"><br>
+	</div>
+</div><br><br><br>
+<div style="padding-top: 8px; display: table;">
+	<div style="display: table-cell;">
+		Caractères de début:<br>
+		<input id="start" class="round" type="text">
+	</div>
+	<div style="display: table-cell;">
+		Caractères du millieu:<br>
+		<input id="middle" class="round" type="text">
+	</div>
+	<div style="display: table-cell;">
+		Caractères de fin:<br>
+		<input id="end" class="round" type="text" value="\\n">
+	</div>
+</div><br>
+<div>
+	<div style="float: left; width: 35%;">
+		Stocker dans:<br>
+		<select id="storage" class="round">
+			${data.variables[1]}
+		</select>
+	</div>
+	<div id="varNameContainer2" style="float: right; width: 60%;">
+		Nom de la variable:<br>
+		<input id="varName2" class="round" type="text">
 	</div>
 </div>`
 },
@@ -111,7 +118,7 @@ Name:<br>
 init: function() {
 	const {glob, document} = this;
 
-	glob.variableChange(document.getElementById('storage'), 'varNameContainer');
+	glob.listChange(document.getElementById('list'), 'varNameContainer');
 },
 
 //---------------------------------------------------------------------
@@ -124,29 +131,30 @@ init: function() {
 
 action: function(cache) {
 	const data = cache.actions[cache.index];
-	const server = cache.server;
-	const roleData = {};
-	if(data.roleName) {
-		roleData.name = this.evalMessage(data.roleName, cache);
+	const storage = parseInt(data.list);
+	const varName = this.evalMessage(data.varName, cache);
+	const list = this.getList(storage, varName, cache);
+
+	const start = this.evalMessage(data.start, cache).replace('\\n', '\n');
+	const middle = this.evalMessage(data.middle, cache).replace('\\n', '\n');
+	const end = this.evalMessage(data.end, cache).replace('\\n', '\n');
+	let result = '';
+
+	for(let i = 0; i < list.length; i++) {
+		if(i === 0) {
+			result += (start + String(list[i]) + end);
+		} else {
+			result += (start + middle + String(list[i]) + end);
+		}
 	}
-	if(data.color) {
-		roleData.color = this.evalMessage(data.color, cache);
+
+	if(result) {
+		const varName2 = this.evalMessage(data.varName2, cache);
+		const storage2 = parseInt(data.storage);
+		this.storeValue(result, storage2, varName2, cache);
 	}
-	if(data.position) {
-		roleData.position = parseInt(data.position);
-	}
-	roleData.hoist = JSON.parse(data.hoist);
-	roleData.mentionable = JSON.parse(data.mentionable);
-	if(server && server.createRole) {
-		const storage = parseInt(data.storage);
-		server.createRole(roleData).then(function(role) {
-			const varName = this.evalMessage(data.varName, cache);
-			this.storeValue(role, storage, varName, cache);
-			this.callNextAction(cache);
-		}.bind(this)).catch(this.displayError.bind(this, data, cache));
-	} else {
-		this.callNextAction(cache);
-	}
+
+	this.callNextAction(cache);
 },
 
 //---------------------------------------------------------------------

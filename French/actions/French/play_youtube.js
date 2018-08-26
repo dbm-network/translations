@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Créer un rôle",
+name: "Lire une vidéo YouTube",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,15 @@ name: "Créer un rôle",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Contrôle de rôle",
+section: "Contrôle d'audio",
+
+//---------------------------------------------------------------------
+// Requires Audio Libraries
+//
+// If 'true', this action requires audio libraries to run.
+//---------------------------------------------------------------------
+
+requiresAudioLibraries: true,
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,19 +31,7 @@ section: "Contrôle de rôle",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `${data.roleName}`;
-},
-
-//---------------------------------------------------------------------
-// Action Storage Function
-//
-// Stores the relevant variable info for the editor.
-//---------------------------------------------------------------------
-
-variableStorage: function(data, varType) {
-	const type = parseInt(data.storage);
-	if(type !== varType) return;
-	return ([data.varName, 'Role']);
+	return `${data.url}`;
 },
 
 //---------------------------------------------------------------------
@@ -46,7 +42,7 @@ variableStorage: function(data, varType) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "varName"],
+fields: ["url", "seek", "volume", "passes", "bitrate", "type"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -66,37 +62,28 @@ fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "va
 
 html: function(isEvent, data) {
 	return `
-Name:<br>
-<input id="roleName" class="round" type="text"><br>
+<div>
+	URL YouTube:<br>
+	<input id="url" class="round" type="text" value="https://www.youtube.com/watch?v=2zgcFFvEA9g"><br>
+</div>
 <div style="float: left; width: 50%;">
-	Afficher séparémment des utilis. en ligne:<br>
-	<select id="hoist" class="round" style="width: 90%;">
-		<option value="true">Oui</option>
-		<option value="false" selected>Non</option>
-	</select><br>
-	Mentionable:<br>
-	<select id="mentionable" class="round" style="width: 90%;">
-		<option value="true" selected>Oui</option>
-		<option value="false">Non</option>
-	</select><br>
+	Position de lecture:<br>
+	<input id="seek" class="round" type="text" value="0"><br>
+	Passes:<br>
+	<input id="passes" class="round" type="text" value="1">
 </div>
 <div style="float: right; width: 50%;">
-	Couleur:<br>
-	<input id="color" class="round" type="text" placeholder="Laisser vide pour par défaut."><br>
-	Position:<br>
-	<input id="position" class="round" type="text" placeholder="Laisser vide pour par défaut." style="width: 90%;"><br>
-</div>
+	Volume (0 = min; 100 = max):<br>
+	<input id="volume" class="round" type="text" placeholder="Laisser vide pour automatique..."><br>
+	Débit binaire:<br>
+	<input id="bitrate" class="round" type="text" placeholder="Laisser vide pour automatique...">
+</div><br><br><br><br><br><br><br>
 <div>
-	<div style="float: left; width: 35%;">
-		Stocker dans:<br>
-		<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
-			${data.variables[0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Nom de la variable:<br>
-		<input id="varName" class="round" type="text"><br>
-	</div>
+	Type de lecture:<br>
+	<select id="type" class="round" style="width: 90%;">
+		<option value="0" selected>Ajouter à la queue</option>
+		<option value="1">Lire immédiatement</option>
+	</select>
 </div>`
 },
 
@@ -109,9 +96,6 @@ Name:<br>
 //---------------------------------------------------------------------
 
 init: function() {
-	const {glob, document} = this;
-
-	glob.variableChange(document.getElementById('storage'), 'varNameContainer');
 },
 
 //---------------------------------------------------------------------
@@ -124,29 +108,36 @@ init: function() {
 
 action: function(cache) {
 	const data = cache.actions[cache.index];
-	const server = cache.server;
-	const roleData = {};
-	if(data.roleName) {
-		roleData.name = this.evalMessage(data.roleName, cache);
+	const Audio = this.getDBM().Audio;
+	const options = {};
+	if(data.seek) {
+		options.seek = parseInt(this.evalMessage(data.seek, cache));
 	}
-	if(data.color) {
-		roleData.color = this.evalMessage(data.color, cache);
-	}
-	if(data.position) {
-		roleData.position = parseInt(data.position);
-	}
-	roleData.hoist = JSON.parse(data.hoist);
-	roleData.mentionable = JSON.parse(data.mentionable);
-	if(server && server.createRole) {
-		const storage = parseInt(data.storage);
-		server.createRole(roleData).then(function(role) {
-			const varName = this.evalMessage(data.varName, cache);
-			this.storeValue(role, storage, varName, cache);
-			this.callNextAction(cache);
-		}.bind(this)).catch(this.displayError.bind(this, data, cache));
+	if(data.volume) {
+		options.volume = parseInt(this.evalMessage(data.volume, cache)) / 100;
+	} else if(cache.server) {
+		options.volume = Audio.volumes[cache.server.id] || 0.5;
 	} else {
-		this.callNextAction(cache);
+		options.volume = 0.5;
 	}
+	if(data.passes) {
+		options.passes = parseInt(this.evalMessage(data.passes, cache));
+	}
+	if(data.bitrate) {
+		options.bitrate = parseInt(this.evalMessage(data.bitrate, cache));
+	} else {
+		options.bitrate = 'auto';
+	}
+	const url = this.evalMessage(data.url, cache);
+	if(url) {
+		const info = ['yt', options, url];
+		if(data.type === "0") {
+			Audio.addToQueue(info, cache);
+		} else if(cache.server && cache.server.id !== undefined) {
+			Audio.playItem(info, cache.server.id);
+		}
+	}
+	this.callNextAction(cache);
 },
 
 //---------------------------------------------------------------------

@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Créer un rôle",
+name: "Executer un script",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "Créer un rôle",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Contrôle de rôle",
+section: "Autre",
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,7 +23,7 @@ section: "Contrôle de rôle",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `${data.roleName}`;
+	return `${data.code}`;
 },
 
 //---------------------------------------------------------------------
@@ -35,7 +35,7 @@ subtitle: function(data) {
 variableStorage: function(data, varType) {
 	const type = parseInt(data.storage);
 	if(type !== varType) return;
-	return ([data.varName, 'Role']);
+	return ([data.varName, 'Unknown Type']);
 },
 
 //---------------------------------------------------------------------
@@ -46,7 +46,7 @@ variableStorage: function(data, varType) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "varName"],
+fields: ["behavior", "interpretation", "code", "storage", "varName"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -66,26 +66,26 @@ fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "va
 
 html: function(isEvent, data) {
 	return `
-Name:<br>
-<input id="roleName" class="round" type="text"><br>
-<div style="float: left; width: 50%;">
-	Afficher séparémment des utilis. en ligne:<br>
-	<select id="hoist" class="round" style="width: 90%;">
-		<option value="true">Oui</option>
-		<option value="false" selected>Non</option>
-	</select><br>
-	Mentionable:<br>
-	<select id="mentionable" class="round" style="width: 90%;">
-		<option value="true" selected>Oui</option>
-		<option value="false">Non</option>
-	</select><br>
-</div>
-<div style="float: right; width: 50%;">
-	Couleur:<br>
-	<input id="color" class="round" type="text" placeholder="Laisser vide pour par défaut."><br>
-	Position:<br>
-	<input id="position" class="round" type="text" placeholder="Laisser vide pour par défaut." style="width: 90%;"><br>
-</div>
+<div>
+	<div style="float: left; width: 45%;">
+		Comportement de fin:<br>
+		<select id="behavior" class="round">
+			<option value="0" selected>Call Next Action Automatically</option>
+			<option value="1">Do Not Call Next Action</option>
+		</select>
+	</div>
+	<div style="padding-left: 5%; float: left; width: 55%;">
+		Style d'interprétation:<br>
+		<select id="interpretation" class="round">
+			<option value="0" selected>Évaluer le texte en premier</option>
+			<option value="1">Évaluer le texte directement</option>
+		</select>
+	</div>
+</div><br><br><br>
+<div style="padding-top: 8px;">
+	Code personnalisé:<br>
+	<textarea id="code" rows="9" name="is-eval" style="width: 99%; white-space: nowrap; resize: none;"></textarea>
+</div><br>
 <div>
 	<div style="float: left; width: 35%;">
 		Stocker dans:<br>
@@ -95,7 +95,7 @@ Name:<br>
 	</div>
 	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
 		Nom de la variable:<br>
-		<input id="varName" class="round" type="text"><br>
+		<input id="varName" class="round" type="text">
 	</div>
 </div>`
 },
@@ -124,27 +124,17 @@ init: function() {
 
 action: function(cache) {
 	const data = cache.actions[cache.index];
-	const server = cache.server;
-	const roleData = {};
-	if(data.roleName) {
-		roleData.name = this.evalMessage(data.roleName, cache);
-	}
-	if(data.color) {
-		roleData.color = this.evalMessage(data.color, cache);
-	}
-	if(data.position) {
-		roleData.position = parseInt(data.position);
-	}
-	roleData.hoist = JSON.parse(data.hoist);
-	roleData.mentionable = JSON.parse(data.mentionable);
-	if(server && server.createRole) {
-		const storage = parseInt(data.storage);
-		server.createRole(roleData).then(function(role) {
-			const varName = this.evalMessage(data.varName, cache);
-			this.storeValue(role, storage, varName, cache);
-			this.callNextAction(cache);
-		}.bind(this)).catch(this.displayError.bind(this, data, cache));
+	let code;
+	if(data.interpretation === "0") {
+		code = this.evalMessage(data.code, cache);
 	} else {
+		code = data.code;
+	}
+	const result = this.eval(code, cache);
+	const varName = this.evalMessage(data.varName, cache);
+	const storage = parseInt(data.storage);
+	this.storeValue(result, storage, varName, cache);
+	if(data.behavior === "0") {
 		this.callNextAction(cache);
 	}
 },

@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Créer un rôle",
+name: "Trouver un serveur",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "Créer un rôle",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Contrôle de rôle",
+section: "Contrôle de serveur",
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,7 +23,8 @@ section: "Contrôle de rôle",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `${data.roleName}`;
+	const info = ['ID du serveur', 'Nom du serveur', 'Acronyme du serveur', 'Nombre d\'utilis. du serveur', 'Region du serveur', 'ID du propriétaiare du serveur', 'Niveau de vérification du serveur', 'Serveur disponible'];
+	return `Trouver le serveur avec ${info[parseInt(data.info)]}`;
 },
 
 //---------------------------------------------------------------------
@@ -35,7 +36,7 @@ subtitle: function(data) {
 variableStorage: function(data, varType) {
 	const type = parseInt(data.storage);
 	if(type !== varType) return;
-	return ([data.varName, 'Role']);
+	return ([data.varName, 'Server']);
 },
 
 //---------------------------------------------------------------------
@@ -46,7 +47,7 @@ variableStorage: function(data, varType) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "varName"],
+fields: ["info", "find", "storage", "varName"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -66,36 +67,35 @@ fields: ["roleName", "hoist", "mentionable", "color", "position", "storage", "va
 
 html: function(isEvent, data) {
 	return `
-Name:<br>
-<input id="roleName" class="round" type="text"><br>
-<div style="float: left; width: 50%;">
-	Afficher séparémment des utilis. en ligne:<br>
-	<select id="hoist" class="round" style="width: 90%;">
-		<option value="true">Oui</option>
-		<option value="false" selected>Non</option>
-	</select><br>
-	Mentionable:<br>
-	<select id="mentionable" class="round" style="width: 90%;">
-		<option value="true" selected>Oui</option>
-		<option value="false">Non</option>
-	</select><br>
-</div>
-<div style="float: right; width: 50%;">
-	Couleur:<br>
-	<input id="color" class="round" type="text" placeholder="Laisser vide pour par défaut."><br>
-	Position:<br>
-	<input id="position" class="round" type="text" placeholder="Laisser vide pour par défaut." style="width: 90%;"><br>
-</div>
 <div>
-	<div style="float: left; width: 35%;">
-		Stocker dans:<br>
-		<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
-			${data.variables[0]}
+	<div style="float: left; width: 40%;">
+		Champs source:<br>
+		<select id="info" class="round">
+			<option value="0" selected>ID du serveur</option>
+			<option value="1">Nom du serveur</option>
+			<option value="2">Acronyme du serveur</option>
+			<option value="3">Nombre d'utilisateurs du serveur</option>
+			<option value="4">Region du serveur</option>
+			<option value="5">ID du propriétaire du serveur</option>
+			<option value="6">Niveau de vérification du serveur</option>
+			<option value="7">Serveur disponible</option>
 		</select>
 	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
+	<div style="float: right; width: 55%;">
+		Valeur à rechercher:<br>
+		<input id="find" class="round" type="text">
+	</div>
+</div><br><br><br>
+<div style="padding-top: 8px;">
+	<div style="float: left; width: 35%;">
+		Stocker dans:<br>
+		<select id="storage" class="round">
+			${data.variables[1]}
+		</select>
+	</div>
+	<div id="varNameContainer" style="float: right; width: 60%;">
 		Nom de la variable:<br>
-		<input id="varName" class="round" type="text"><br>
+		<input id="varName" class="round" type="text">
 	</div>
 </div>`
 },
@@ -109,9 +109,6 @@ Name:<br>
 //---------------------------------------------------------------------
 
 init: function() {
-	const {glob, document} = this;
-
-	glob.variableChange(document.getElementById('storage'), 'varNameContainer');
 },
 
 //---------------------------------------------------------------------
@@ -123,27 +120,45 @@ init: function() {
 //---------------------------------------------------------------------
 
 action: function(cache) {
+	const bot = this.getDBM().Bot.bot;
+	const servers = bot.guilds;
 	const data = cache.actions[cache.index];
-	const server = cache.server;
-	const roleData = {};
-	if(data.roleName) {
-		roleData.name = this.evalMessage(data.roleName, cache);
+	const info = parseInt(data.info);
+	const find = this.evalMessage(data.find, cache);
+	let result;
+	switch(info) {
+		case 0:
+			result = servers.find('id', find);
+			break;
+		case 1:
+			result = servers.find('name', find);
+			break;
+		case 2:
+			result = servers.find('nameAcronym', find);
+			break;
+		case 3:
+			result = servers.find('memberCount', parseInt(find));
+			break;
+		case 4:
+			result = servers.find('region', find);
+			break;
+		case 5:
+			result = servers.find('ownerID', find);
+			break;
+		case 6:
+			result = servers.find('verificationLevel', parseInt(find));
+			break;
+		case 7:
+			result = servers.find('available', Boolean(find === 'true'));
+			break;
+		default:
+			break;
 	}
-	if(data.color) {
-		roleData.color = this.evalMessage(data.color, cache);
-	}
-	if(data.position) {
-		roleData.position = parseInt(data.position);
-	}
-	roleData.hoist = JSON.parse(data.hoist);
-	roleData.mentionable = JSON.parse(data.mentionable);
-	if(server && server.createRole) {
+	if(result !== undefined) {
 		const storage = parseInt(data.storage);
-		server.createRole(roleData).then(function(role) {
-			const varName = this.evalMessage(data.varName, cache);
-			this.storeValue(role, storage, varName, cache);
-			this.callNextAction(cache);
-		}.bind(this)).catch(this.displayError.bind(this, data, cache));
+		const varName = this.evalMessage(data.varName, cache);
+		this.storeValue(result, storage, varName, cache);
+		this.callNextAction(cache);
 	} else {
 		this.callNextAction(cache);
 	}
