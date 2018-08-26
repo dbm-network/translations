@@ -69,22 +69,22 @@ html: function(isEvent, data) {
 Name:<br>
 <input id="roleName" class="round" type="text"><br>
 <div style="float: left; width: 50%;">
-	Afficher séparémment des utilisateurs en ligne:<br>
+	Afficher séparémment des utilis. en ligne:<br>
 	<select id="hoist" class="round" style="width: 90%;">
 		<option value="true">Oui</option>
 		<option value="false" selected>Non</option>
 	</select><br>
-	Mentionnable:<br>
+	Mentionable:<br>
 	<select id="mentionable" class="round" style="width: 90%;">
 		<option value="true" selected>Oui</option>
-		<option value="false">No,</option>
+		<option value="false">Non</option>
 	</select><br>
 </div>
 <div style="float: right; width: 50%;">
 	Couleur:<br>
-	<input id="color" class="round" type="text" placeholder="Laisser vide pour la couleur par défaut."><br>
+	<input id="color" class="round" type="text" placeholder="Laisser vide pour par défaut."><br>
 	Position:<br>
-	<input id="position" class="round" type="text" placeholder="Laisser vide pour la position par défaut" style="width: 90%;"><br>
+	<input id="position" class="round" type="text" placeholder="Laisser vide pour par défaut." style="width: 90%;"><br>
 </div>
 <div>
 	<div style="float: left; width: 35%;">
