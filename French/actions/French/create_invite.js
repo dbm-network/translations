@@ -32,7 +32,7 @@ subtitle: function(data) {
 		'Global Variable'
 	];
 	const index = parseInt(data.storage);
-	return parseInt(data.storage) < 3 ? `Invite to ${names[index]}` : `Invite to ${names[index]} (${data.varName})`;
+	return parseInt(data.storage) < 3 ? `Inviter à ${names[index]}` : `Inviter à ${names[index]} (${data.varName})`;
 },
 
 //---------------------------------------------------------------------
@@ -109,13 +109,13 @@ html: function(isEvent, data) {
 </div><br><br><br><br><br><br><br>
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 35%;">
-		:<br>
+		Stocker dans:<br>
 		<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer2')">
 			${data.variables[0]}
 		</select>
 	</div>
 	<div id="varNameContainer2" style="display: none; float: right; width: 60%;">
-		Variable Name:<br>
+		Nom de la variable:<br>
 		<input id="varName2" class="round" type="text"><br>
 	</div>
 </div>`
