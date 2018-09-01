@@ -1,4 +1,4 @@
-Unofficial Translations
+﻿Unofficial Translations
 =
 
 Download the zip file, then just drag and drop whats inside of your selected language into Discord Bot Makers directory, overwriting files.
@@ -14,3 +14,4 @@ Current Languages
 | **Español**       	| With some actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) Credits to: ChileanS	| 100%               	| ~10%              	| bot.js                 	|
 | **Français**        	| With some Actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) Credits to: iAmaury	| 100%               	| ~50%              	| bot.js                 	|
 | **Türkçe**        	| Credits to: Tresmos                                                            	| 100%               	| 0%                	|                        	|
+| **Japanese**        	| Credits to: JoKeR#0001                                                            	| 100%               	| 0%                	|                        	|
