@@ -14,3 +14,4 @@ Current Languages
 | **Español**       	| With some actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) Credits to: ChileanS	| 100%               	| ~10%              	| bot.js                 	|
 | **Français**        	| With some Actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) Credits to: iAmaury	| 100%               	| ~50%              	| bot.js                 	|
 | **Türkçe**        	| Credits to: Tresmos                                                            	| 100%               	| 0%                	|                        	|
+| **Portuguese**        	| Credits to: MrGold                                                            	| 100%               	| 0%                	|                        	|
