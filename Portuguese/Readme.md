@@ -10,7 +10,7 @@
 - [x] Abra o DBM e vá a Project &rarr; Open Actions Directory;
 - [x] Cole a pasta transferida aí.
 
-### Por ultimo, abra a pasta de `nofficial-translation-extras/portuguese` (*no GitHub*) e faça download do **`bot.js`**.
+### Por ultimo, abra a pasta de `unofficial-translation-extras/portuguese` (*no GitHub*) e faça download do **`bot.js`**.
 - [x] Abra o DBM e vá a Project &rarr; Open Project Diretory;
 - [x] Substitua o `bot.js` existente pelo traduzido;
 - [x] Seguidamente, abra o DBM e vá a Project &rarr; Open Actions Directory;
