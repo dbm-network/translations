@@ -16,4 +16,4 @@
 - [x] Seguidamente, abra o DBM e vá a Project &rarr; Open Actions Directory;
 - [x] Volte uma pasta atrás (Você deve estar em `\steamapps\common\Discord Bot Maker`) e abra a pasta `bot`, e substitua o `bot.js` existente pelo traduzido.
 
-**Se houver algum erro na tradução, por favor, entre em contacto connosco por DM no Discord: Mr.Gold#9003 ou Almeida#000**
+**Se houver algum erro na tradução, por favor, entre em contacto connosco por DM no Discord: Mr.Gold#9003 ou Almeida#0001**
