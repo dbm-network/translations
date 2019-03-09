@@ -9,7 +9,7 @@ Current Languages
 
 | Current Languages 	| Notes                                                       	| Main Translation % 	| Default Actions % 	| Other Translated Items 	|
 |-------------------	|-------------------------------------------------------------	|--------------------	|-------------------	|------------------------	|
-| **Deutsch**       	| Credits to: EliteArtz, Lasse                                                         	| 100%               	| 0%                	|                        	|
+| **Deutsch**       	| With some actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) Credits to: EliteArtz, Lasse, ZockerNico | 100%               	| 100%                	| bot.js                   	|
 | **Nederlands**    	| Credits to: realCmdData                                                             	| 100%               	| 0%                	|                        	|
 | **Español**       	| With some actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) Credits to: ChileanS	| 100%               	| ~10%              	| bot.js                 	|
 | **Français**        | With some Actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) Credits to: iAmaury	| 100%               	| ~75%              	| bot.js                 	|
