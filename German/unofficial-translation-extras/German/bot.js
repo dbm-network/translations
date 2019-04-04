@@ -396,22 +396,22 @@ Actions.generateTimeString = function(miliSeconds) {
 	const days = Math.floor(remaining / 60 / 60 / 24);
 	if(days > 0) {
 		remaining -= (days * 60 * 60 * 24);
-		times.push(days + (days === 1 ? " Tage" : " Tage"));
+		times.push(days + (days === 1 ? " Tag" : " Tage"));
 	}
 	const hours = Math.floor(remaining / 60 / 60);
 	if(hours > 0) {
 		remaining -= (hours * 60 * 60);
-		times.push(hours + (hours === 1 ? " Stunden" : " Stunden"));
+		times.push(hours + (hours === 1 ? " Stunde" : " Stunden"));
 	}
 	const minutes = Math.floor(remaining / 60);
 	if(minutes > 0) {
 		remaining -= (minutes * 60);
-		times.push(minutes + (minutes === 1 ? " Minuten" : " Minuten"));
+		times.push(minutes + (minutes === 1 ? " Minute" : " Minuten"));
 	}
 	const seconds = Math.floor(remaining);
 	if(seconds > 0) {
 		remaining -= (seconds);
-		times.push(seconds + (seconds === 1 ? " Sekunden" : " Sekunden"));
+		times.push(seconds + (seconds === 1 ? " Sekunde" : " Sekunden"));
 	}
 
 	let result = '';
