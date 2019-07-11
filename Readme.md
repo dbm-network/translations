@@ -15,3 +15,4 @@ Current Languages
 | **Français**        | With some Actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) Credits to: iAmaury	| 100%               	| ~75%              	| bot.js                 	|
 | **Türkçe**        	| Credits to: Tresmos                                                            	| 100%               	| 0%                	|                        	|
 | **Portuguese**      | With some actions Translated, including a translated bot.js ( copy the bot.js to your bot! ) Credits to: MrGold, Almeida | 100%               	| 10%              	| bot.js                 	|
+| **Chinese**        	| Credits to: mxsj666                                                            	| 100%               	| 0%                	|                        	|
