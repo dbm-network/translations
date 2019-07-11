@@ -17,7 +17,7 @@
 #### Por ultimo, abra a pasta de `unofficial-translation-extras/portuguese` (*no GitHub*) e faça download do **`bot.js`**.
 <ol>
   <li>Abra o DBM e vá a Project &rarr; Open Project Diretory</li>
-  <li>Substitua o `bot.js` existente pelo traduzido</li>
+  <li>Substitua o <b>bot.js</b> existente pelo traduzido</li>
   <li>Seguidamente, abra o DBM e vá a Project &rarr; Open Actions Directory</li>
-  <li>Volte uma pasta atrás (Você deve estar em `\steamapps\common\Discord Bot Maker`) e abra a pasta `bot`, e substitua o `bot.js` existente pelo traduzido.</li>
+  <li>Volte uma pasta atrás (Você deve estar em <b>\steamapps\common\Discord Bot Maker</b>) e abra a pasta <b>bot</b>, e substitua o <b>bot.js</b> existente pelo traduzido.</li>
 </ol>
