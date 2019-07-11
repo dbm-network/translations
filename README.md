@@ -29,3 +29,4 @@ Languages | Notes | Main Translation % | Default Actions % | Other Files | Credi
 **Français** | With some Actions translated. Includes translated bot.js | 100%	| ~75% | bot.js | iAmaury
 **Türkçe** | | 100% | 0% | | Tresmos
 **Português** | With some Actions translated. Includes translated bot.js | 100% | 10% | bot.js | MrGold, Almeeida
+**한국어(Korean)** | | 95% | 0% |   | Sangoon_Is_Noob
