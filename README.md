@@ -8,12 +8,12 @@ If you wish to add translations, just follow the examples with other already tra
   <li>Download the translations that you want</li>
   <li>Open DBM</li>
   <li>Click on Project: Open Translations Directory</li>
-  <li>Paste the main file of the translation there (Should be called <Language name>.json)</li>
+  <li>Paste the main file of the translation there (Should be called &lt;Language name&gt;.json)</li>
 </ol>
 If the language you want has actions translated, continue with these steps:
 <ol>
   <li>In DBM: Click on Project - Open Actions Directory</li>
-  <li>Paste the folder that has the actions inside of it (Should be called <Language name>)</li>
+  <li>Paste the folder that has the actions inside of it (Should be called &lt;Language name&gt;)</li>
 </ol>
 
 To choose the language inside DBM, press the Language tab and click on the language that you want. (DBM must be restarted after adding the new translations for them to be shown there.)
