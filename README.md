@@ -31,3 +31,4 @@ Languages | Notes | Main Translation % | Default Actions % | Other Files | Credi
 **Português** | With some Actions translated. Includes translated bot.js | 100% | 10% | bot.js | MrGold, Almeeida
 **한국어(Korean)** | | 95% | 0% | | Sangoon_Is_Noob
 **Croatian** | The translation might have some typos | ~30% | 0% | | Teo338 |
+**Italian** |  | 100% | 0% | | Chicchi7393 |
