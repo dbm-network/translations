@@ -20,7 +20,6 @@ To choose the language inside DBM, press the Language tab and click on the langu
 
 ## Current Languages
 
-
 Languages | Notes | Main Translation % | Default Actions % | Other Files | Credits
 --------- | ----- | ------------------ | ----------------- | ----------- | -------
 **Deutsch** | With some Actions translated. Includes translated bot.js | 100% | 100% | bot.js | EliteArtz, Lasse, ZockerNico
@@ -30,5 +29,6 @@ Languages | Notes | Main Translation % | Default Actions % | Other Files | Credi
 **Türkçe** | | 100% | 0% | | Tresmos
 **Português** | With some Actions translated. Includes translated bot.js | 100% | 10% | bot.js | MrGold, Almeeida
 **한국어(Korean)** | | 95% | 0% | | Sangoon_Is_Noob
-**Croatian** | The translation might have some typos | ~30% | 0% | | Teo338 |
-**Italian** |  | 100% | 0% | | Chicchi7393 |
+**Croatian** | The translation might have some typos | ~30% | 0% | | Teo338
+**Italian** | | 100% | 0% | | Chicchi7393
+**Chinese** | | 100% | 100% | | mxsj666
