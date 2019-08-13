@@ -31,5 +31,5 @@ Languages | Notes | Main Translation % | Default Actions % | Other Files | Credi
 **한국어(Korean)** | | 95% | 0% | | Sangoon_Is_Noob
 **Croatian** | The translation might have some typos | ~30% | 0% | | Teo338
 **Italian** | | 100% | 0% | | Chicchi7393
-**Chinese** | | 100% | 100% | | mxsj666
-**Estonian** | With some actions translated. | 100% | 50% | | EstDaniel
+**Chinese** | With all the Actions translated. | 100% | 100% | | mxsj666
+**Estonian** | With some Actions translated. | 100% | 50% | | EstDaniel
