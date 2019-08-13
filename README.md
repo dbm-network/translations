@@ -32,3 +32,4 @@ Languages | Notes | Main Translation % | Default Actions % | Other Files | Credi
 **Croatian** | The translation might have some typos | ~30% | 0% | | Teo338
 **Italian** | | 100% | 0% | | Chicchi7393
 **Chinese** | | 100% | 100% | | mxsj666
+**Estonian** | With some actions translated. | 100% | 50% | | EstDaniel
