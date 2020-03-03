@@ -1,6 +1,6 @@
 # Unofficial DBM Translations
 This repository includes some unofficial translations for [Discord Bot Maker](https://store.steampowered.com/app/682130/Discord_Bot_Maker/).
-If you wish to add translations, just follow the examples with other already translated files and make a pull request here.
+If you wish to add translations, just follow the examples with other already translated files and make a pull request here. [View on GitHub.](https://github.com/dbm-network/translations)
 
 ## How to install translations:
 ***This process requires you to have the beta version of DBM.***
