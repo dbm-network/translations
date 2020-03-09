@@ -27,7 +27,7 @@
 
 ## Overview
 
-This repository houses user-made translations for [Discord Bot Maker](https://store.steampowered.com/app/682130/Discord_Bot_Maker/). Feel free to use them in the software. If you wish to download a specific translation, **do not clone/download this repository**, but instead, follow the [installation guide](#installing-mods). If you wish to add translations, just follow the examples with other already translated files and make a pull request [here](https://github.com/dbm-network/translations/pulls).
+This repository houses user-made translations for [Discord Bot Maker](https://store.steampowered.com/app/682130/Discord_Bot_Maker/). Feel free to use them in the software. If you wish to download a specific translation, follow the [installation guide](#installing-mods). If you wish to add translations, just follow the examples with other already translated files and make a pull request [here](https://github.com/dbm-network/translations/pulls).
 
 ## Downloads
 
@@ -38,7 +38,7 @@ Translations are meant to be used on the beta version of Discord Bot Maker.
 1. Close Discord Bot Maker
 2. Open your Steam Library and find Discord Bot Maker on the Software tab
 3. Right-click it → Properties → Local Files → Browse Local Files
-4. If you wish to download all the translations, download this zip: [here](https://dbm-network.github.io/download-git/#/home?url=https://github.com/dbm-network/translations/tree/master/translations) (**do not clone/download this repository**) otherwise, download the translation you want from [here](#current-translations) 
+4. If you wish to download all the translations, download this zip: [here](https://github.com/dbm-network/translations/archive/master.zip) otherwise, download the translation you want from [here](#current-translations) 
 5. Now copy the folder(s) you downloaded out of the zip file into the DBM folder (*Please overwrite existing ones*)
 
 ### Installing beta
