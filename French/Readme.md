@@ -5,4 +5,4 @@ Pour cela, cliquez sur `Project`, `Open Actions Directory` et allez un dossier e
 
 Veuillez aussi glisser le `bot.js` dans le dossier Projet de votre bot.
 
-Contactez-moi sur discord sous ce tag : `Renard#9979`
+Contactez-moi sur discord sous ce tag : `Amaury#8490`
