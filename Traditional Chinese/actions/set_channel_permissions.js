@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "設定頻道權限",
+name: "Set Channel Permissions",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "設定頻道權限",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "频道控制",
+section: "Channel Control",
 
 //---------------------------------------------------------------------
 // Action Subtitle
