@@ -68,7 +68,7 @@ To download a specific translation, click on the translation on the table below.
 | [**Italian**](https://dbm-network.github.io/download-git/#/home?url=https://github.com/dbm-network/translations/tree/master/Italian)        |                                                          | 100%               | 0%                |             | Chicchi7393                  |
 | [**Chinese**](https://dbm-network.github.io/download-git/#/home?url=https://github.com/dbm-network/translations/tree/master/Chinese)       | With all the Actions translated.                         | 100%               | 100%              |             | mxsj666                      |
 | [**Estonian**](https://dbm-network.github.io/download-git/#/home?url=https://github.com/dbm-network/translations/tree/master/Estonian)      | With some Actions translated.                            | 100%               | 50%               |             | EstDaniel                    |
-| [**Traditional Chinese**](https://dbm-network.github.io/download-git/#/home?url=https://github.com/dbm-network/translations/tree/master/Traditional%20Chinese)      | With all Actions translated.                            | 100%               | 100%               |             | ANI,不叮狗                |
+| [**Traditional Chinese**](https://dbm-network.github.io/download-git/#/home?url=https://github.com/dbm-network/translations/tree/master/Traditional%20Chinese)      | With all Actions translated.(for ver 1.5)*1.6will update later*| 100%               | 100%               | bot.js      | ANI,不叮狗                |
 
 ### License
 
