@@ -1,171 +1,171 @@
 module.exports = {
+  //---------------------------------------------------------------------
+  // Action Name
+  //
+  // This is the name of the action displayed in the editor.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Name
-//
-// This is the name of the action displayed in the editor.
-//---------------------------------------------------------------------
+  name: "Créer un message intégré",
 
-name: "Créer un message embed",
+  //---------------------------------------------------------------------
+  // Action Section
+  //
+  // This is the section the action will fall into.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Section
-//
-// This is the section the action will fall into.
-//---------------------------------------------------------------------
+  section: "Intégrer le message",
 
-section: "Message",
+  //---------------------------------------------------------------------
+  // Action Subtitle
+  //
+  // This function generates the subtitle displayed next to the name.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Subtitle
-//
-// This function generates the subtitle displayed next to the name.
-//---------------------------------------------------------------------
+  subtitle(data, presets) {
+    return `${data.title}`;
+  },
 
-subtitle: function(data) {
-	return `${data.title}`;
-},
+  //---------------------------------------------------------------------
+  // Action Storage Function
+  //
+  // Stores the relevant variable info for the editor.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Storage Function
-//
-// Stores the relevant variable info for the editor.
-//---------------------------------------------------------------------
+  variableStorage(data, varType) {
+    const type = parseInt(data.storage, 10);
+    if (type !== varType) return;
+    return [data.varName, "Embed Message Data"];
+  },
 
-variableStorage: function(data, varType) {
-	const type = parseInt(data.storage);
-	if(type !== varType) return;
-	return ([data.varName, 'Embed Message']);
-},
+  //---------------------------------------------------------------------
+  // Action Meta Data
+  //
+  // Helps check for updates and provides info if a custom mod.
+  // If this is a third-party mod, please set "author" and "authorUrl".
+  //
+  // It's highly recommended "preciseCheck" is set to false for third-party mods.
+  // This will make it so the patch version (0.0.X) is not checked.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Fields
-//
-// These are the fields for the action. These fields are customized
-// by creating elements with corresponding IDs in the HTML. These
-// are also the names of the fields stored in the action's JSON data.
-//---------------------------------------------------------------------
+  meta: { version: "2.1.7", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
-fields: ["title", "author", "color", "timestamp", "url", "authorIcon", "imageUrl", "thumbUrl", "storage", "varName"],
+  //---------------------------------------------------------------------
+  // Action Fields
+  //
+  // These are the fields for the action. These fields are customized
+  // by creating elements with corresponding IDs in the HTML. These
+  // are also the names of the fields stored in the action's JSON data.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Command HTML
-//
-// This function returns a string containing the HTML used for
-// editting actions. 
-//
-// The "isEvent" parameter will be true if this action is being used
-// for an event. Due to their nature, events lack certain information, 
-// so edit the HTML to reflect this.
-//
-// The "data" parameter stores constants for select elements to use. 
-// Each is an array: index 0 for commands, index 1 for events.
-// The names are: sendTargets, members, roles, channels, 
-//                messages, servers, variables
-//---------------------------------------------------------------------
+  fields: ["title", "author", "color", "timestamp", "url", "authorIcon", "imageUrl", "thumbUrl", "storage", "varName"],
 
-html: function(isEvent, data) {
-	return `
-<div style="float: left; width: 50%;">
-	Titre:<br>
+  //---------------------------------------------------------------------
+  // Command HTML
+  //
+  // This function returns a string containing the HTML used for
+  // editing actions.
+  //
+  // The "isEvent" parameter will be true if this action is being used
+  // for an event. Due to their nature, events lack certain information,
+  // so edit the HTML to reflect this.
+  //---------------------------------------------------------------------
+
+  html(isEvent, data) {
+    return `
+<div style="float: left; width: calc(50% - 12px);">
+	<span class="dbminputlabel">Title</span><br>
 	<input id="title" class="round" type="text"><br>
-	Author:<br>
-	<input id="author" class="round" type="text" placeholder="Laisser vide pour aucun."><br>
-	Couleur:<br>
-	<input id="color" class="round" type="text" placeholder="Laisser vide pour par défaut."><br>
-	Utiliser l'horodotage:<br>
-	<select id="timestamp" class="round" style="width: 90%;">
-		<option value="true">Oui</option>
-		<option value="false" selected>Non</option>
+	<span class="dbminputlabel">Author</span><br>
+	<input id="author" class="round" type="text" placeholder="Leave blank to disallow author!"><br>
+	<span class="dbminputlabel">Color</span><br>
+	<input id="color" class="round" type="text" placeholder="Leave blank for default!"><br>
+	<span class="dbminputlabel">Use Timestamp</span><br>
+	<select id="timestamp" class="round">
+		<option value="true">Yes</option>
+		<option value="false" selected>No</option>
 	</select><br>
 </div>
-<div style="float: right; width: 50%;">
-	URL:<br>
-	<input id="url" class="round" type="text" placeholder="Laisser vide pour aucun."><br>
-	URL de l'icône de l'auteur:<br>
-	<input id="authorIcon" class="round" type="text" placeholder="Laisser vide pour aucun."><br>
-	URL de l'image:<br>
-	<input id="imageUrl" class="round" type="text" placeholder="Laisser vide pour aucun."><br>
-	URL de la vignette:<br>
-	<input id="thumbUrl" class="round" type="text" placeholder="Laisser vide pour aucun."><br>
+
+<div style="float: right; width: calc(50% - 12px);">
+	<span class="dbminputlabel">URL</span><br>
+	<input id="url" class="round" type="text" placeholder="Leave blank for none!"><br>
+	<span class="dbminputlabel">Author Icon URL</span><br>
+	<input id="authorIcon" class="round" type="text" placeholder="Leave blank for none!"><br>
+	<span class="dbminputlabel">Image URL</span><br>
+	<input id="imageUrl" class="round" type="text" placeholder="Leave blank for none!"><br>
+	<span class="dbminputlabel">Thumbnail URL</span><br>
+	<input id="thumbUrl" class="round" type="text" placeholder="Leave blank for none!"><br>
 </div>
-<div>
-	<div style="float: left; width: 35%;">
-		Stocker dans:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Nom de la variable:<br>
-		<input id="varName" class="round" type="text"><br>
-	</div>
-</div>`
-},
 
-//---------------------------------------------------------------------
-// Action Editor Init Code
-//
-// When the HTML is first applied to the action editor, this code
-// is also run. This helps add modifications or setup reactionary
-// functions for the DOM elements.
-//---------------------------------------------------------------------
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-init: function() {
-},
+<hr class="subtlebar">
 
-//---------------------------------------------------------------------
-// Action Bot Function
-//
-// This is the function for the action within the Bot's Action class.
-// Keep in mind event calls won't have access to the "msg" parameter, 
-// so be sure to provide checks for variable existance.
-//---------------------------------------------------------------------
+<br>
 
-action: function(cache) {
-	const data = cache.actions[cache.index];
-	const embed = this.createEmbed();
-	embed.setTitle(this.evalMessage(data.title, cache));
-	if(data.url) {
-		embed.setURL(this.evalMessage(data.url, cache));
-	}
-	if(data.author && data.authorIcon) {
-		embed.setAuthor(this.evalMessage(data.author, cache), this.evalMessage(data.authorIcon, cache));
-	}
-	if(data.color) {
-		embed.setColor(this.evalMessage(data.color, cache));
-	}
-	if(data.imageUrl) {
-		embed.setImage(this.evalMessage(data.imageUrl, cache));
-	}
-	if(data.thumbUrl) {
-		embed.setThumbnail(this.evalMessage(data.thumbUrl, cache));
-	}
-	if(data.timestamp === "true") {
-		embed.setTimestamp(new Date());
-	}
-	const storage = parseInt(data.storage);
-	const varName = this.evalMessage(data.varName, cache);
-	this.storeValue(embed, storage, varName, cache);
-	this.callNextAction(cache);
-},
+<store-in-variable dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
+  },
 
-//---------------------------------------------------------------------
-// Action Bot Mod
-//
-// Upon initialization of the bot, this code is run. Using the bot's
-// DBM namespace, one can add/modify existing functions if necessary.
-// In order to reduce conflictions between mods, be sure to alias
-// functions you wish to overwrite.
-//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Editor Init Code
+  //
+  // When the HTML is first applied to the action editor, this code
+  // is also run. This helps add modifications or setup reactionary
+  // functions for the DOM elements.
+  //---------------------------------------------------------------------
 
-mod: function(DBM) {
-	const DiscordJS = DBM.DiscordJS;
-	const Actions = DBM.Actions;
+  init() {},
 
-	Actions.createEmbed = function() {
-		return new DiscordJS.RichEmbed();
-	};
-}
+  //---------------------------------------------------------------------
+  // Action Bot Function
+  //
+  // This is the function for the action within the Bot's Action class.
+  // Keep in mind event calls won't have access to the "msg" parameter,
+  // so be sure to provide checks for variable existence.
+  //---------------------------------------------------------------------
 
-}; // End of module
+  action(cache) {
+    const data = cache.actions[cache.index];
+    const { MessageEmbed } = this.getDBM().DiscordJS;
+    const embed = new MessageEmbed();
+    if (data.title) {
+      embed.setTitle(this.evalMessage(data.title, cache));
+    }
+    if (data.url) {
+      embed.setURL(this.evalMessage(data.url, cache));
+    }
+    if (data.author && data.authorIcon) {
+      embed.setAuthor({
+        name: this.evalMessage(data.author, cache),
+        iconURL: this.evalMessage(data.authorIcon, cache),
+      });
+    }
+    if (data.color) {
+      embed.setColor(this.evalMessage(data.color, cache));
+    }
+    if (data.imageUrl) {
+      embed.setImage(this.evalMessage(data.imageUrl, cache));
+    }
+    if (data.thumbUrl) {
+      embed.setThumbnail(this.evalMessage(data.thumbUrl, cache));
+    }
+    if (data.timestamp === "true") {
+      embed.setTimestamp();
+    }
+    const storage = parseInt(data.storage, 10);
+    const varName = this.evalMessage(data.varName, cache);
+    this.storeValue(embed, storage, varName, cache);
+    this.callNextAction(cache);
+  },
+
+  //---------------------------------------------------------------------
+  // Action Bot Mod
+  //
+  // Upon initialization of the bot, this code is run. Using the bot's
+  // DBM namespace, one can add/modify existing functions if necessary.
+  // In order to reduce conflicts between mods, be sure to alias
+  // functions you wish to overwrite.
+  //---------------------------------------------------------------------
+
+  mod(DBM) {},
+};

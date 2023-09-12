@@ -1,8 +1,15 @@
-Les traductions ont été faites par `iAmaury`, n'hésitez pas à me prévenir au cas où il y aurait des fautes d'orthographe.
+Bonjour je m'appelle HinataNekoNya.
 
-Veuillez déplacer tous ce qui se trouve dans ce dossier vers votre dossier de DBM.
-Pour cela, cliquez sur `Project`, `Open Actions Directory` et allez un dossier en arrière, puis glissez tout dans le dossier de DBM (ce fichier texte n'est pas nécessaire, ni le `bot.js`)
+Cette traduction a était faite benevolement pour: Discord Bot Maker V2.1.7
 
-Veuillez aussi glisser le `bot.js` dans le dossier Projet de votre bot.
+Tous est pas correcte si il y a des erreur merci de corriger l'erreur et de me renvoyer le fichier corriger,
+je me ferais un plaisir de mettre a jour cette traduction pour les prochaines versions et d'améliorer
+les traductions déjà existantes.
 
-Contactez-moi sur discord sous ce tag : `Amaury#8490`
+Merci a iAmaury Grace a qui j'ai pu retraduire une partie des scriptes par comparaison avec sa traduction de l'ancienne version.
+
+Crédit: iAmaury, HinataNekoNya.
+
+Installation:
+
+Pour installer cette traduction rien de plus simple glisser tout les dossiers a la racine de "Discord Bot Maker".

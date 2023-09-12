@@ -1,119 +1,140 @@
 module.exports = {
+  //---------------------------------------------------------------------
+  // Action Name
+  //
+  // This is the name of the action displayed in the editor.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Name
-//
-// This is the name of the action displayed in the editor.
-//---------------------------------------------------------------------
+  name: "Définir le jeu du bot",
 
-name: "Définir le jeu du bot",
+  //---------------------------------------------------------------------
+  // Action Display Name
+  //
+  // Overrides the name that appears in the editor.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Section
-//
-// This is the section the action will fall into.
-//---------------------------------------------------------------------
+  displayName: "Contrôle du clients bot",
 
-section: "Contrôle du bot",
+  //---------------------------------------------------------------------
+  // Action Section
+  //
+  // This is the section the action will fall into.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Subtitle
-//
-// This function generates the subtitle displayed next to the name.
-//---------------------------------------------------------------------
+  section: "Contrôle du clients bot",
 
-subtitle: function(data) {
-	return `${data.gameName}${data.gameLink ? ' [' + data.gameLink + ']' : ''}`;
-},
+  //---------------------------------------------------------------------
+  // Action Subtitle
+  //
+  // This function generates the subtitle displayed next to the name.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Fields
-//
-// These are the fields for the action. These fields are customized
-// by creating elements with corresponding IDs in the HTML. These
-// are also the names of the fields stored in the action's JSON data.
-//---------------------------------------------------------------------
+  subtitle(data, presets) {
+    const activityPrefix = {
+      PLAYING: "Playing",
+      STREAMING: "Streaming",
+      LISTENING: "Listening to",
+      WATCHING: "Watching",
+      COMPETING: "Competing in",
+    };
+    return `${activityPrefix[data.activityType]} ${data.gameName}${data.gameLink ? " [" + data.gameLink + "]" : ""}`;
+  },
 
-fields: ["gameName", "gameLink"],
+  //---------------------------------------------------------------------
+  // Action Meta Data
+  //
+  // Helps check for updates and provides info if a custom mod.
+  // If this is a third-party mod, please set "author" and "authorUrl".
+  //
+  // It's highly recommended "preciseCheck" is set to false for third-party mods.
+  // This will make it so the patch version (0.0.X) is not checked.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Command HTML
-//
-// This function returns a string containing the HTML used for
-// editting actions. 
-//
-// The "isEvent" parameter will be true if this action is being used
-// for an event. Due to their nature, events lack certain information, 
-// so edit the HTML to reflect this.
-//
-// The "data" parameter stores constants for select elements to use. 
-// Each is an array: index 0 for commands, index 1 for events.
-// The names are: sendTargets, members, roles, channels, 
-//                messages, servers, variables
-//---------------------------------------------------------------------
+  meta: { version: "2.1.7", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
-html: function(isEvent, data) {
-	return `
-<div style="width: 90%;">
-	Nom du jeu:<br>
-	<input id="gameName" class="round" type="text">
-</div><br>
-<div style="width: 90%;">
-	Lien du stream Twitch:<br>
-	<input id="gameLink" class="round" type="text" placeholder="Laisser vide pour aucun.">
-</div>
-`
-},
+  //---------------------------------------------------------------------
+  // Action Fields
+  //
+  // These are the fields for the action. These fields are customized
+  // by creating elements with corresponding IDs in the HTML. These
+  // are also the names of the fields stored in the action's JSON data.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Editor Init Code
-//
-// When the HTML is first applied to the action editor, this code
-// is also run. This helps add modifications or setup reactionary
-// functions for the DOM elements.
-//---------------------------------------------------------------------
+  fields: ["gameName", "gameLink", "activityType"],
 
-init: function() {
-},
+  //---------------------------------------------------------------------
+  // Command HTML
+  //
+  // This function returns a string containing the HTML used for
+  // editing actions.
+  //
+  // The "isEvent" parameter will be true if this action is being used
+  // for an event. Due to their nature, events lack certain information,
+  // so edit the HTML to reflect this.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Bot Function
-//
-// This is the function for the action within the Bot's Action class.
-// Keep in mind event calls won't have access to the "msg" parameter, 
-// so be sure to provide checks for variable existance.
-//---------------------------------------------------------------------
+  html(isEvent, data) {
+    return `
+<span class="dbminputlabel">Game Name</span><br>
+<input id="gameName" class="round" type="text">
 
-action: function(cache) {
-	const botClient = this.getDBM().Bot.bot.user;
-	const data = cache.actions[cache.index];
-	const game = this.evalMessage(data.gameName, cache);
-	const link = this.evalMessage(data.gameLink, cache);
-	if(botClient && botClient.setPresence) {
-		if(link) {
-			botClient.setPresence({ game: { name: game, type: 0, url: link } }).then(function() {
-				this.callNextAction(cache);
-			}.bind(this)).catch(this.displayError.bind(this, data, cache));
-		} else {
-			botClient.setPresence({ game: { name: game, type: 0 } }).then(function() {
-				this.callNextAction(cache);
-			}.bind(this)).catch(this.displayError.bind(this, data, cache));
-		}
-	} else {
-		this.callNextAction(cache);
-	}
-},
+<br>
 
-//---------------------------------------------------------------------
-// Action Bot Mod
-//
-// Upon initialization of the bot, this code is run. Using the bot's
-// DBM namespace, one can add/modify existing functions if necessary.
-// In order to reduce conflictions between mods, be sure to alias
-// functions you wish to overwrite.
-//---------------------------------------------------------------------
+<span class="dbminputlabel">Twitch Stream Link</span><br>
+<input id="gameLink" class="round" type="text" placeholder="Leave blank to disallow! If set, overrules the activity type">
 
-mod: function(DBM) {
-}
+<br>
 
-}; // End of module
+<span class="dbminputlabel">Activity Type</span>
+<select id="activityType" class="round">
+  <option value="PLAYING" selected>Playing</option>
+  <option value="STREAMING">Streaming</option>
+  <option value="LISTENING">Listening</option>
+  <option value="WATCHING">Watching</option>
+  <option value="COMPETING">Competing</option>
+</select>
+`;
+  },
+
+  //---------------------------------------------------------------------
+  // Action Editor Init Code
+  //
+  // When the HTML is first applied to the action editor, this code
+  // is also run. This helps add modifications or setup reactionary
+  // functions for the DOM elements.
+  //---------------------------------------------------------------------
+
+  init() {},
+
+  //---------------------------------------------------------------------
+  // Action Bot Function
+  //
+  // This is the function for the action within the Bot's Action class.
+  // Keep in mind event calls won't have access to the "msg" parameter,
+  // so be sure to provide checks for variable existence.
+  //---------------------------------------------------------------------
+
+  action(cache) {
+    const botClient = this.getDBM().Bot.bot.user;
+    const data = cache.actions[cache.index];
+    const name = this.evalMessage(data.gameName, cache);
+    const url = this.evalMessage(data.gameLink, cache);
+    if (url) {
+      botClient.setActivity(name, { type: "STREAMING", url });
+    } else {
+      botClient.setActivity(name, { type: data.activityType });
+    }
+    this.callNextAction(cache);
+  },
+
+  //---------------------------------------------------------------------
+  // Action Bot Mod
+  //
+  // Upon initialization of the bot, this code is run. Using the bot's
+  // DBM namespace, one can add/modify existing functions if necessary.
+  // In order to reduce conflicts between mods, be sure to alias
+  // functions you wish to overwrite.
+  //---------------------------------------------------------------------
+
+  mod() {},
+};

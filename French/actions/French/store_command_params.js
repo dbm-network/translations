@@ -1,246 +1,310 @@
 module.exports = {
+  //---------------------------------------------------------------------
+  // Command Only
+  //
+  // If this is 'true', then this will only be available for commands.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Command Only
-//
-// If this is 'true', then this will only be available for commands.
-//---------------------------------------------------------------------
+  commandOnly: true,
 
-commandOnly: true,
+  //---------------------------------------------------------------------
+  // Action Name
+  //
+  // This is the name of the action displayed in the editor.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Name
-//
-// This is the name of the action displayed in the editor.
-//---------------------------------------------------------------------
+  name: "Stocker les paramètres de commande",
 
-name: "Stocker les arguments",
+  //---------------------------------------------------------------------
+  // Action Section
+  //
+  // This is the section the action will fall into.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Section
-//
-// This is the section the action will fall into.
-//---------------------------------------------------------------------
+  section: "D'autres choses",
 
-section: "Autre",
+  //---------------------------------------------------------------------
+  // Action Subtitle
+  //
+  // This function generates the subtitle displayed next to the name.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Subtitle
-//
-// This function generates the subtitle displayed next to the name.
-//---------------------------------------------------------------------
+  subtitle(data, presets) {
+    const infoSources = [
+      "One Parameter",
+      "Multiple Parameters",
+      "Mentioned Member",
+      "Mentioned Role",
+      "Mentioned Channel",
+    ];
+    return `${infoSources[parseInt(data.info, 10)]} #${data.infoIndex}`;
+  },
 
-subtitle: function(data) {
-	const infoSources = ['Un argument', 'Plusieurs arguments', 'Mentioned Member', 'Mentioned Role', 'Mentioned Channel']
-	return `${infoSources[parseInt(data.info)]} #${data.infoIndex}`;
-},
+  //---------------------------------------------------------------------
+  // Action Storage Function
+  //
+  // Stores the relevant variable info for the editor.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Storage Function
-//
-// Stores the relevant variable info for the editor.
-//---------------------------------------------------------------------
+  variableStorage(data, varType) {
+    const type = parseInt(data.storage, 10);
+    if (type !== varType) return;
+    const info = parseInt(data.info, 10);
+    let dataType = "None";
+    switch (info) {
+      case 0:
+      case 1:
+        dataType = "Text";
+        break;
+      case 2:
+        dataType = "Server Member";
+        break;
+      case 3:
+        dataType = "Role";
+        break;
+      case 4:
+        dataType = "Channel";
+        break;
+    }
+    return [data.varName, dataType];
+  },
 
-variableStorage: function(data, varType) {
-	const type = parseInt(data.storage);
-	if(type !== varType) return;
-	const info = parseInt(data.info);
-	let dataType = 'None';
-	switch(info) {
-		case 0:
-		case 1:
-			dataType = "Text";
-			break;
-		case 2:
-			dataType = "Server Member";
-			break;
-		case 3:
-			dataType = "Role";
-			break;
-		case 4:
-			dataType = "Channel";
-			break;
-	}
-	return ([data.varName, dataType]);
-},
+  //---------------------------------------------------------------------
+  // Action Meta Data
+  //
+  // Helps check for updates and provides info if a custom mod.
+  // If this is a third-party mod, please set "author" and "authorUrl".
+  //
+  // It's highly recommended "preciseCheck" is set to false for third-party mods.
+  // This will make it so the patch version (0.0.X) is not checked.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Fields
-//
-// These are the fields for the action. These fields are customized
-// by creating elements with corresponding IDs in the HTML. These
-// are also the names of the fields stored in the action's JSON data.
-//---------------------------------------------------------------------
+  meta: { version: "2.1.7", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
-fields: ["info", "infoIndex", "storage", "varName"],
+  //---------------------------------------------------------------------
+  // Action Fields
+  //
+  // These are the fields for the action. These fields are customized
+  // by creating elements with corresponding IDs in the HTML. These
+  // are also the names of the fields stored in the action's JSON data.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Command HTML
-//
-// This function returns a string containing the HTML used for
-// editting actions. 
-//
-// The "isEvent" parameter will be true if this action is being used
-// for an event. Due to their nature, events lack certain information, 
-// so edit the HTML to reflect this.
-//
-// The "data" parameter stores constants for select elements to use. 
-// Each is an array: index 0 for commands, index 1 for events.
-// The names are: sendTargets, members, roles, channels, 
-//                messages, servers, variables
-//---------------------------------------------------------------------
+  fields: ["info", "infoIndex", "storage", "varName"],
 
-html: function(isEvent, data) {
-	return `
+  //---------------------------------------------------------------------
+  // Command HTML
+  //
+  // This function returns a string containing the HTML used for
+  // editing actions.
+  //
+  // The "isEvent" parameter will be true if this action is being used
+  // for an event. Due to their nature, events lack certain information,
+  // so edit the HTML to reflect this.
+  //---------------------------------------------------------------------
+
+  html(isEvent, data) {
+    return `
 <div>
 	<div style="float: left; width: 35%;">
-		Information source:<br>
-		<select id="info" class="round" onchange="glob.onChange1(this)">
-			<option value="0" selected>Un argument</option>
-			<option value="1">Plusieurs arguments</option>
-			<option value="2">Utilisateur mentionnér</option>
-			<option value="3">Rôle mentionné</option>
-			<option value="4">Salon mentionné</option>
+		<span class="dbminputlabel">Source Info</span><br>
+		<select id="info" class="round" onchange="glob.onSourceInfoChanged(this)">
+			<option value="0" selected>One Parameter</option>
+			<option value="1">Multiple Parameters</option>
+			<option value="2">Mentioned Member</option>
+			<option value="3">Mentioned Role</option>
+			<option value="4">Mentioned Channel</option>
 		</select>
 	</div>
 	<div style="float: right; width: 60%;">
-		<div id="infoCountLabel">Nombre d'arguments:</div>
+		<span class="dbminputlabel" id="infoCountLabel">Parameter Number:</span>
 		<input id="infoIndex" class="round" type="text" value="1"><br>
 	</div>
-</div><br><br><br><br>
-<div>
-	<div style="float: left; width: 35%;">
-		Stocker dans:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Nom de la variable:<br>
-		<input id="varName" class="round" type="text"><br>
-	</div>
-</div>`
-},
+</div>
 
-//---------------------------------------------------------------------
-// Action Editor Init Code
-//
-// When the HTML is first applied to the action editor, this code
-// is also run. This helps add modifications or setup reactionary
-// functions for the DOM elements.
-//---------------------------------------------------------------------
+<br><br><br>
 
-init: function() {
-	const {glob, document} = this;
+<store-in-variable style="padding-top: 8px;" dropdownLabel="Store In" selectId="storage" variableContainerId="varNameContainer" variableInputId="varName"></store-in-variable>`;
+  },
 
-	glob.onChange1 = function(event) {
-		const value = parseInt(event.value);
-		const infoCountLabel = document.getElementById("infoCountLabel");
-		switch(value) {
-			case 0:
-				infoCountLabel.innerHTML = 'Nombre d\'arguments:';
-				break;
-			case 1:
-				infoCountLabel.innerHTML = 'Commence depuis l\'argument numéro:';
-				break;
-			case 2:
-				infoCountLabel.innerHTML = 'Nombre d\'utilisateurs mentionnnés:';
-				break;
-			case 3:
-				infoCountLabel.innerHTML = 'Nombre de rôles mentionnés:';
-				break
-			case 4:
-				infoCountLabel.innerHTML = 'Nombre de salons mentionnés:';
-				break;
-			default:
-				infoCountLabel.innerHTML = '';
-				break;
-		}
-	};
+  //---------------------------------------------------------------------
+  // Action Editor Init Code
+  //
+  // When the HTML is first applied to the action editor, this code
+  // is also run. This helps add modifications or setup reactionary
+  // functions for the DOM elements.
+  //---------------------------------------------------------------------
 
-	glob.onChange1(document.getElementById('info'));
-},
+  init() {
+    const { glob, document } = this;
 
-//---------------------------------------------------------------------
-// Action Bot Function
-//
-// This is the function for the action within the Bot's Action class.
-// Keep in mind event calls won't have access to the "msg" parameter, 
-// so be sure to provide checks for variable existance.
-//---------------------------------------------------------------------
+    glob.onSourceInfoChanged = function (event) {
+      const value = parseInt(event.value, 10);
+      const infoCountLabel = document.getElementById("infoCountLabel");
+      switch (value) {
+        case 0:
+          infoCountLabel.innerHTML = "Parameter Number";
+          break;
+        case 1:
+          infoCountLabel.innerHTML = "Starting From Parameter Number";
+          break;
+        case 2:
+          infoCountLabel.innerHTML = "Member Mention Number";
+          break;
+        case 3:
+          infoCountLabel.innerHTML = "Role Mention Number";
+          break;
+        case 4:
+          infoCountLabel.innerHTML = "Channel Mention Number";
+          break;
+        default:
+          infoCountLabel.innerHTML = "";
+          break;
+      }
+    };
 
-action: function(cache) {
-	const data = cache.actions[cache.index];
-	const msg = cache.msg;
-	const infoType = parseInt(data.info);
-	const index = parseInt(this.evalMessage(data.infoIndex, cache));
-	const separator = this.getDBM().Files.data.settings.separator || '\\s+';
-	let source;
-	switch(infoType) {
-		case 0:
-			if(msg && msg.content) {
-				const params = msg.content.split(new RegExp(separator));
-				source = params[index] || '';
-			}
-			break;
-		case 1:
-			if(msg && msg.content) {
-				const params = msg.content.split(new RegExp(separator));
-				source = '';
-				for(let i = 0; i < index; i++) {
-					source += (params[i] + ' ');
-				}
-				const location = msg.content.indexOf(source);
-				if(location === 0) {
-					source = msg.content.substring(source.length);
-				}
-			}
-			break;
-		case 2:
-			if(msg && msg.mentions && msg.mentions.members) {
-				const members = msg.mentions.members.array();
-				if(members[index - 1]) {
-					source = members[index - 1];
-				}
-			}
-			break;
-		case 3:
-			if(msg && msg.mentions && msg.mentions.roles) {
-				const roles = msg.mentions.roles.array();
-				if(roles[index - 1]) {
-					source = roles[index - 1];
-				}
-			}
-			break
-		case 4:
-			if(msg && msg.mentions && msg.mentions.channels) {
-				const channels = msg.mentions.channels.array();
-				if(channels[index - 1]) {
-					source = channels[index - 1];
-				}
-			}
-			break;
-		default:
-			break;
-	}
-	if(source) {
-		const storage = parseInt(data.storage);
-		const varName = this.evalMessage(data.varName, cache);
-		this.storeValue(source, storage, varName, cache);
-	}
-	this.callNextAction(cache);
-},
+    glob.onSourceInfoChanged(document.getElementById("info"));
+  },
 
-//---------------------------------------------------------------------
-// Action Bot Mod
-//
-// Upon initialization of the bot, this code is run. Using the bot's
-// DBM namespace, one can add/modify existing functions if necessary.
-// In order to reduce conflictions between mods, be sure to alias
-// functions you wish to overwrite.
-//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Bot Function
+  //
+  // This is the function for the action within the Bot's Action class.
+  // Keep in mind event calls won't have access to the "msg" parameter,
+  // so be sure to provide checks for variable existence.
+  //---------------------------------------------------------------------
 
-mod: function(DBM) {
-}
+  action(cache) {
+    const data = cache.actions[cache.index];
+    const msg = cache.msg;
+    const interactionOptions = cache.interaction?.options ?? null;
+    if (!msg && !interactionOptions) {
+      return this.callNextAction(cache);
+    }
 
-}; // End of module
+    const { Bot, Files } = this.getDBM();
+    const infoType = parseInt(data.info, 10);
+    const index = parseInt(this.evalMessage(data.infoIndex, cache), 10) - 1;
+    
+    let separator;
+    let content = null;
+    const getContent = () => {
+      if (content === null) {
+        separator = Files.data.settings.separator || "\\s+";
+        Bot.populateTagRegex();
+        content = msg.content?.replace(Bot.tagRegex, "").replace(Bot.checkTag(msg.content), "").trimStart();
+      }
+      return content;
+    }
+
+    let source;
+    switch (infoType) {
+
+      case 0: {
+        if (interactionOptions) {
+          const result = this.getParameterFromParameterData(interactionOptions.data[index]);
+          if (result) {
+            source = result;
+          }
+        } else if (msg && getContent()) {
+          const params = content.split(new RegExp(separator));
+          source = params[index] || "";
+        }
+        break;
+      }
+
+      case 1: {
+        if (interactionOptions) {
+          const result = [];
+          for (let i = 0; i < index; i++) {
+            const r = this.getParameterFromParameterData(interactionOptions.data[i]);
+            if (r) {
+              result.push(r);
+            }
+          }
+          if (result.length > 0) {
+            source = result;
+          }
+        } else if (msg && getContent()) {
+          const params = content.split(new RegExp(separator));
+          source = "";
+          for (let i = 0; i < index; i++) {
+            source += params[i] + " ";
+          }
+          const location = content.indexOf(source);
+          if (location === 0) {
+            source = content.substring(source.length);
+          }
+        }
+        break;
+      }
+
+      case 2: {
+        if (interactionOptions) {
+          const options = interactionOptions.data.filter(option => option.type === "USER");
+          if (options[index]) {
+            source = options[index].member ?? options[index].user;
+          }
+        } else if (msg.mentions.members.size) {
+          const members = [...msg.mentions.members.values()];
+          if (members[index]) {
+            source = members[index];
+          }
+        }
+        break;
+      }
+
+      case 3: {
+        if (interactionOptions) {
+          const options = interactionOptions.data.filter(option => option.type === "ROLE");
+          if (options[index]) {
+            source = options[index].role;
+          }
+        } else if (msg.mentions.roles.size) {
+          const roles = [...msg.mentions.roles.values()];
+          if (roles[index]) {
+            source = roles[index];
+          }
+        }
+        break;
+      }
+
+      case 4: {
+        if (interactionOptions) {
+          const options = interactionOptions.data.filter(option => option.type === "CHANNEL");
+          if (options[index]) {
+            source = options[index].channel;
+          }
+        } else if (msg.mentions.channels.size) {
+          const channels = [...msg.mentions.channels.values()];
+          if (channels[index]) {
+            source = channels[index];
+          }
+        }
+        break;
+      }
+
+      default: {
+        break;
+      }
+    }
+
+    if (source) {
+      const storage = parseInt(data.storage, 10);
+      const varName = this.evalMessage(data.varName, cache);
+      this.storeValue(source, storage, varName, cache);
+    }
+
+    this.callNextAction(cache);
+  },
+
+  //---------------------------------------------------------------------
+  // Action Bot Mod
+  //
+  // Upon initialization of the bot, this code is run. Using the bot's
+  // DBM namespace, one can add/modify existing functions if necessary.
+  // In order to reduce conflicts between mods, be sure to alias
+  // functions you wish to overwrite.
+  //---------------------------------------------------------------------
+
+  mod() {},
+};
