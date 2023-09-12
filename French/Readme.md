@@ -13,3 +13,6 @@ Crédit: iAmaury, HinataNekoNya.
 Installation:
 
 Pour installer cette traduction rien de plus simple glisser tout les dossiers a la racine de "Discord Bot Maker".
+
+
+Discord: hinatanekonya
