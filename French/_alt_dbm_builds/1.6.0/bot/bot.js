@@ -1,11 +1,18 @@
-/*
+/******************************************************
  * Discord Bot Maker Bot
- * Version 2.0.1
+ * Version 1.6.10
  * Robert Borghese
- */
+ ******************************************************/
 
 const DBM = {};
-const DiscordJS = DBM.DiscordJS = require('discord.js');
+DBM.version = "1.6.10";
+
+const DiscordJS = DBM.DiscordJS = require("discord.js");
+
+if(DiscordJS.version < "12.0.0") {
+	console.log("Cette version de Discord Bot Maker nécessite Discord.JS v12.\nVeuillez utiliser \"Projet > Module Manager\" et \"Projet > Reinstall Node Modules\" pour mettre à jour vers Discord.JS v12.");
+	throw new Error("Besoin de Discord.JS v12 pour fonctionner !!!");
+}
 
 //---------------------------------------------------------------------
 // Bot
@@ -24,13 +31,41 @@ Bot.bot = null;
 
 Bot.init = function() {
 	this.initBot();
+	this.setupBot();
 	this.reformatData();
 	this.initEvents();
 	this.login();
 };
 
 Bot.initBot = function() {
-	this.bot = new DiscordJS.Client();
+	this.bot = new DiscordJS.Client({ ws: { intents: this.intents() }});
+};
+
+Bot.intents = function() {
+	return DiscordJS.Intents.NON_PRIVILEGED;
+}
+
+Bot.setupBot = function() {
+	this.bot.on("raw", this.onRawData);
+};
+
+Bot.onRawData = function(packet) {
+	if(packet.t !== "MESSAGE_REACTION_ADD" || packet.t !== "MESSAGE_REACTION_REMOVE") return;
+
+	const client = Bot.bot;
+	const channel = client.channels.cache.get(packet.d.channel_id);
+	if(channel.messages.cache.has(packet.d.message_id)) return;
+
+	channel.messages.fetch(packet.d.message_id).then(function(message) {
+		const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
+		const reaction = message.reactions.cache.get(emoji);
+		if (packet.t === "MESSAGE_REACTION_ADD") {
+			client.emit("messageReactionAdd", reaction, client.users.cache.get(packet.d.user_id));
+		}
+		if (packet.t === "MESSAGE_REACTION_REMOVE") {
+			client.emit("messageReactionRemove", reaction, client.users.cache.get(packet.d.user_id));
+		}
+	});
 };
 
 Bot.reformatData = function() {
@@ -41,18 +76,18 @@ Bot.reformatData = function() {
 Bot.reformatCommands = function() {
 	const data = Files.data.commands;
 	if(!data) return;
-	this._caseSensitive = Boolean(Files.data.settings.case === 'true');
+	this._caseSensitive = Files.data.settings.case === "true";
 	for(let i = 0; i < data.length; i++) {
 		const com = data[i];
 		if(com) {
 			switch(com.comType) {
-				case '1':
+				case "1":
 					this.$icds.push(com);
 					break;
-				case '2':
+				case "2":
 					this.$regx.push(com);
 					break;
-				case '3':
+				case "3":
 					this.$anym.push(com);
 					break;
 				default:
@@ -85,7 +120,7 @@ Bot.reformatEvents = function() {
 	for(let i = 0; i < data.length; i++) {
 		const com = data[i];
 		if(com) {
-			const type = com['event-type'];
+			const type = com["event-type"];
 			if(!this.$evts[type]) this.$evts[type] = [];
 			this.$evts[type].push(com);
 		}
@@ -93,8 +128,8 @@ Bot.reformatEvents = function() {
 };
 
 Bot.initEvents = function() {
-	this.bot.on('ready', this.onReady.bind(this));
-	this.bot.on('message', this.onMessage.bind(this));
+	this.bot.on("ready", this.onReady.bind(this));
+	this.bot.on("message", this.onMessage.bind(this));
 	Events.registerEvents(this.bot);
 };
 
@@ -103,8 +138,8 @@ Bot.login = function() {
 };
 
 Bot.onReady = function() {
-	if(process.send) process.send('BotReady');
-	console.log('Le bot est démarré !');
+	if(process.send) process.send("BotReady");
+	console.log("Bot is ready!"); // Tells editor to start!
 	this.restoreVariables();
 	this.preformInitialization();
 };
@@ -153,7 +188,7 @@ Bot.checkCommand = function(msg) {
 
 Bot.checkTag = function(content) {
 	const tag = Files.data.settings.tag;
-	const separator = Files.data.settings.separator || '\\s+';
+	const separator = Files.data.settings.separator || "\\s+";
 	content = content.split(new RegExp(separator))[0];
 	if(content.startsWith(tag)) {
 		return content.substring(tag.length);
@@ -166,7 +201,7 @@ Bot.onAnyMessage = function(msg) {
 	this.checkRegExps(msg);
 	if(!msg.author.bot) {
 		if(this.$evts["2"]) {
-			Events.callEvents("2", 1, 0, 2, false, '', msg);
+			Events.callEvents("2", 1, 0, 2, false, "", msg);
 		}
 		const anym = this.$anym;
 		for(let i = 0; i < anym.length; i++) {
@@ -184,13 +219,13 @@ Bot.checkIncludes = function(msg) {
 	const icds_len = icds.length;
 	for(let i = 0; i < icds_len; i++) {
 		if(icds[i] && icds[i].name) {
-			if(text.match(new RegExp('\\b' + icds[i].name + '\\b', 'i'))) {
+			if(text.match(new RegExp("\\b" + icds[i].name + "\\b", "i"))) {
 				Actions.preformActions(msg, icds[i]);
 			} else if(icds[i]._aliases) {
 				const aliases = icds[i]._aliases;
 				const aliases_len = aliases.length;
 				for(let j = 0; j < aliases_len; j++) {
-					if(text.match(new RegExp('\\b' + aliases[j] + '\\b', 'i'))) {
+					if(text.match(new RegExp("\\b" + aliases[j] + "\\b", "i"))) {
 						Actions.preformActions(msg, icds[i]);
 						break;
 					}
@@ -207,13 +242,13 @@ Bot.checkRegExps = function(msg) {
 	const regx_len = regx.length;
 	for(let i = 0; i < regx_len; i++) {
 		if(regx[i] && regx[i].name) {
-			if(text.match(new RegExp(regx[i].name, 'i'))) {
+			if(text.match(new RegExp(regx[i].name, "i"))) {
 				Actions.preformActions(msg, regx[i]);
 			} else if(regx[i]._aliases) {
 				const aliases = regx[i]._aliases;
 				const aliases_len = aliases.length;
 				for(let j = 0; j < aliases_len; j++) {
-					if(text.match(new RegExp('\\b' + aliases[j] + '\\b', 'i'))) {
+					if(text.match(new RegExp("\\b" + aliases[j] + "\\b", "i"))) {
 						Actions.preformActions(msg, regx[i]);
 						break;
 					}
@@ -230,7 +265,9 @@ Bot.checkRegExps = function(msg) {
 
 const Actions = DBM.Actions = {};
 
-Actions.location = null;
+Actions.actionsLocation = null;
+Actions.eventsLocation = null;
+Actions.extensionsLocation = null;
 
 Actions.server = {};
 Actions.global = {};
@@ -239,11 +276,11 @@ Actions.timeStamps = [];
 
 Actions.exists = function(action) {
 	if(!action) return false;
-	return typeof(this[action]) === 'function';
+	return typeof(this[action]) === "function";
 };
 
 Actions.getLocalFile = function(url) {
-	return require('path').join(process.cwd(), url);
+	return require("path").join(process.cwd(), url);
 };
 
 Actions.getDBM = function() {
@@ -251,7 +288,7 @@ Actions.getDBM = function() {
 };
 
 Actions.callListFunc = function(list, funcName, args) {
-	return new Promise(function(resolve, reject) {
+	return new Promise(function(resolve) {
 		const max = list.length;
 		let curr = 0;
 		function callItem() {
@@ -260,12 +297,12 @@ Actions.callListFunc = function(list, funcName, args) {
 				return;
 			}
 			const item = list[curr++];
-			if(item && item[funcName] && typeof(item[funcName]) === 'function') {
+			if(typeof(Actions.dest(item, funcName)) === "function") {
 				item[funcName].apply(item, args).then(callItem).catch(callItem);
 			} else {
 				callItem();
 			}
-		};
+		}
 		callItem();
 	});
 };
@@ -291,13 +328,13 @@ Actions.eval = function(content, cache) {
 	const client = DBM.Bot.bot;
 	const bot = DBM.Bot.bot;
 	const me = server ? server.me : null;
-	let user = '', member = '', mentionedUser = '', mentionedChannel = '', defaultChannel = '';
+	let user = "", member = "", mentionedUser = "", mentionedChannel = "", defaultChannel = "";
 	if(msg) {
 		user = msg.author;
 		member = msg.member;
 		if(msg.mentions) {
-			mentionedUser = msg.mentions.users.first() || '';
-			mentionedChannel = msg.mentions.channels.first() || '';
+			mentionedUser = msg.mentions.users.first() || "";
+			mentionedChannel = msg.mentions.channels.first() || "";
 		}
 	}
 	if(server) {
@@ -312,26 +349,41 @@ Actions.eval = function(content, cache) {
 };
 
 Actions.evalMessage = function(content, cache) {
-	if(!content) return '';
+	if(!content) return "";
 	if(!content.match(/\$\{.*\}/im)) return content;
-	return this.eval('`' + content.replace(/`/g,'\\`') + '`', cache);
+	return this.eval("`" + content.replace(/`/g, "\\`") + "`", cache);
 };
 
 Actions.initMods = function() {
-	const fs  = require('fs');
-	fs.readdirSync(this.location).forEach(function(file) {
-		if(file.match(/\.js/i)) {
-			const action = require(require('path').join(this.location, file));
-			this[action.name] = action.action;
-			if(action.mod) {
-				try {
-					action.mod(DBM);
-				} catch(e) {
-					console.error(e);
+	const fs  = require("fs");
+	this.modDirectories().forEach(function(dir) {
+		fs.readdirSync(dir).forEach(function(file) {
+			if(file.match(/\.js/i)) {
+				const action = require(require("path").join(dir, file));
+				if(action.action) {
+					this[action.name] = action.action;
+				}
+				if(action.mod) {
+					try {
+						action.mod(DBM);
+					} catch(e) {
+						console.error(e);
+					}
 				}
 			}
-		}
+		}.bind(this));
 	}.bind(this));
+};
+
+Actions.modDirectories = function() {
+	const result = [this.actionsLocation];
+	if(Files.verifyDirectory(Actions.eventsLocation)) {
+		result.push(this.eventsLocation);
+	}
+	if(Files.verifyDirectory(Actions.extensionsLocation)) {
+		result.push(this.extensionsLocation);
+	}
+	return result;
 };
 
 Actions.preformActions = function(msg, cmd) {
@@ -354,7 +406,7 @@ Actions.checkConditions = function(msg, cmd) {
 		case 1:
 			return isServer && this.checkPermissions(msg, permissions);
 		case 2:
-			return isServer && msg.guild.owner === msg.member;
+			return isServer && msg.guild.ownerID === msg.member.id;
 		case 3:
 			return !isServer;
 		case 4:
@@ -384,7 +436,7 @@ Actions.checkTimeRestriction = function(msg, cmd) {
 			return true;
 		} else {
 			const remaining = cmd._timeRestriction - Math.floor(diff / 1000);
-			Events.callEvents("38", 1, 3, 2, false, '', msg.member, this.generateTimeString(remaining));
+			Events.callEvents("38", 1, 3, 2, false, "", msg.member, this.generateTimeString(remaining));
 		}
 	}
 };
@@ -414,38 +466,38 @@ Actions.generateTimeString = function(miliSeconds) {
 		times.push(seconds + (seconds === 1 ? " seconde" : " secondes"));
 	}
 
-	let result = '';
+	let result = "";
 	if(times.length === 1) {
 		result = times[0];
 	} else if(times.length === 2) {
 		result = times[0] + " et " + times[1];
 	} else if(times.length === 3) {
-		result = times[0] + ", " + times[1] + " et " + times[2];
+		result = times[0] + ", " + times[1] + ", et " + times[2];
 	} else if(times.length === 4) {
-		result = times[0] + ", " + times[1] + ", " + times[2] + " et " + times[3];
+		result = times[0] + ", " + times[1] + ", " + times[2] + ", et " + times[3];
 	}
 	return result;
-}
+};
 
 Actions.checkPermissions = function(msg, permissions) {
 	const author = msg.member;
 	if(!author) return false;
-	if(permissions === 'NONE') return true;
-	if(msg.guild.owner === author) return true;
+	if(permissions === "NONE") return true;
+	if(msg.guild.ownerID === author.id) return true;
 	return author.permissions.has([permissions]);
 };
 
 Actions.invokeActions = function(msg, actions) {
 	const act = actions[0];
 	if(!act) return;
+	const cache = {
+		actions: actions,
+		index: 0,
+		temp: {},
+		server: msg.guild,
+		msg: msg
+	};
 	if(this.exists(act.name)) {
-		const cache = {
-			actions: actions,
-			index: 0,
-			temp: {},
-			server: msg.guild,
-			msg: msg
-		}
 		try {
 			this[act.name](cache);
 		} catch(e) {
@@ -453,6 +505,7 @@ Actions.invokeActions = function(msg, actions) {
 		}
 	} else {
 		console.error(act.name + " n'existe pas !");
+		this.callNextAction(cache);
 	}
 };
 
@@ -460,13 +513,13 @@ Actions.invokeEvent = function(event, server, temp) {
 	const actions = event.actions;
 	const act = actions[0];
 	if(!act) return;
+	const cache = {
+		actions: actions,
+		index: 0,
+		temp: temp,
+		server: server
+	};
 	if(this.exists(act.name)) {
-		const cache = {
-			actions: actions,
-			index: 0,
-			temp: temp,
-			server: server
-		}
 		try {
 			this[act.name](cache);
 		} catch(e) {
@@ -474,6 +527,7 @@ Actions.invokeEvent = function(event, server, temp) {
 		}
 	} else {
 		console.error(act.name + " n'existe pas !");
+		this.callNextAction(cache);
 	}
 };
 
@@ -496,12 +550,13 @@ Actions.callNextAction = function(cache) {
 		}
 	} else {
 		console.error(act.name + " n'existe pas !");
+		this.callNextAction(cache);
 	}
 };
 
 Actions.getErrorString = function(data, cache) {
-	const type = data.permissions ? 'la commande' : 'l\'événement';
-	return `Erreur avec ${type} "${data.name}", Action #${cache.index + 1}`;
+	const type = (data.permissions || data.restriction || !data["event-type"]) ? "la commande" : "l\'événement";
+	return `Erreur avec le ${type} "${data.name}", Action #${cache.index + 1}`;
 };
 
 Actions.displayError = function(data, cache, err) {
@@ -541,7 +596,6 @@ Actions.getSendTarget = function(type, varName, cache) {
 			break;
 		case 5:
 			return cache.temp[varName];
-			break;
 		case 6:
 			if(server && this.server[server.id]) {
 				return this.server[server.id][varName];
@@ -549,7 +603,6 @@ Actions.getSendTarget = function(type, varName, cache) {
 			break;
 		case 7:
 			return this.global[varName];
-			break;
 		default:
 			break;
 	}
@@ -572,7 +625,6 @@ Actions.getMember = function(type, varName, cache) {
 			break;
 		case 2:
 			return cache.temp[varName];
-			break;
 		case 3:
 			if(server && this.server[server.id]) {
 				return this.server[server.id][varName];
@@ -580,7 +632,6 @@ Actions.getMember = function(type, varName, cache) {
 			break;
 		case 4:
 			return this.global[varName];
-			break;
 		default:
 			break;
 	}
@@ -598,7 +649,6 @@ Actions.getMessage = function(type, varName, cache) {
 			break;
 		case 1:
 			return cache.temp[varName];
-			break;
 		case 2:
 			if(server && this.server[server.id]) {
 				return this.server[server.id][varName];
@@ -606,7 +656,6 @@ Actions.getMessage = function(type, varName, cache) {
 			break;
 		case 3:
 			return this.global[varName];
-			break;
 		default:
 			break;
 	}
@@ -623,7 +672,6 @@ Actions.getServer = function(type, varName, cache) {
 			break;
 		case 1:
 			return cache.temp[varName];
-			break;
 		case 2:
 			if(server && this.server[server.id]) {
 				return this.server[server.id][varName];
@@ -631,7 +679,6 @@ Actions.getServer = function(type, varName, cache) {
 			break;
 		case 3:
 			return this.global[varName];
-			break;
 		default:
 			break;
 	}
@@ -649,17 +696,16 @@ Actions.getRole = function(type, varName, cache) {
 			break;
 		case 1:
 			if(msg && msg.member && msg.member.roles) {
-				return msg.member.roles.first();
+				return msg.member.roles.cache.first();
 			}
 			break;
 		case 2:
 			if(server && server.roles) {
-				return server.roles.first();
+				return server.roles.cache.first();
 			}
 			break;
 		case 3:
 			return cache.temp[varName];
-			break;
 		case 4:
 			if(server && this.server[server.id]) {
 				return this.server[server.id][varName];
@@ -667,7 +713,6 @@ Actions.getRole = function(type, varName, cache) {
 			break;
 		case 5:
 			return this.global[varName];
-			break;
 		default:
 			break;
 	}
@@ -695,7 +740,6 @@ Actions.getChannel = function(type, varName, cache) {
 			break;
 		case 3:
 			return cache.temp[varName];
-			break;
 		case 4:
 			if(server && this.server[server.id]) {
 				return this.server[server.id][varName];
@@ -703,8 +747,7 @@ Actions.getChannel = function(type, varName, cache) {
 			break;
 		case 5:
 			return this.global[varName];
-			break;
-		default: 
+		default:
 			break;
 	}
 	return false;
@@ -713,17 +756,18 @@ Actions.getChannel = function(type, varName, cache) {
 Actions.getVoiceChannel = function(type, varName, cache) {
 	const msg = cache.msg;
 	const server = cache.server;
+
 	switch(type) {
 		case 0:
 			if(msg && msg.member) {
-				return msg.member.voiceChannel;
+				return msg.member.voice && msg.member.voice.channel;
 			}
 			break;
 		case 1:
 			if(msg && msg.mentions) {
 				const member = msg.mentions.members.first();
 				if(member) {
-					return member.voiceChannel;
+					return msg.member.voice && msg.member.voice.channel;
 				}
 			}
 			break;
@@ -734,7 +778,6 @@ Actions.getVoiceChannel = function(type, varName, cache) {
 			break;
 		case 3:
 			return cache.temp[varName];
-			break;
 		case 4:
 			if(server && this.server[server.id]) {
 				return this.server[server.id][varName];
@@ -742,8 +785,7 @@ Actions.getVoiceChannel = function(type, varName, cache) {
 			break;
 		case 5:
 			return this.global[varName];
-			break;
-		default: 
+		default:
 			break;
 	}
 	return false;
@@ -755,40 +797,38 @@ Actions.getList = function(type, varName, cache) {
 	switch(type) {
 		case 0:
 			if(server) {
-				return server.members.array();
+				return server.members.cache.array();
 			}
 			break;
 		case 1:
 			if(server) {
-				return server.channels.array();
+				return server.channels.cache.array();
 			}
 			break;
 		case 2:
 			if(server) {
-				return server.roles.array();
+				return server.roles.cache.array();
 			}
 			break;
 		case 3:
 			if(server) {
-				return server.emojis.array();
+				return server.emojis.cache.array();
 			}
 			break;
 		case 4:
-			return Bot.bot.guilds.array();
-			break;
+			return Bot.bot.guilds.cache.array();
 		case 5:
 			if(msg && msg.mentions && msg.mentions.members) {
-				return msg.mentions.members.first().roles.array();
+				return msg.mentions.members.first().roles.cache.array();
 			}
 			break;
 		case 6:
 			if(msg && msg.member) {
-				return msg.member.roles.array();
+				return msg.member.roles.cache.array();
 			}
 			break;
 		case 7:
 			return cache.temp[varName];
-			break;
 		case 8:
 			if(server && this.server[server.id]) {
 				return this.server[server.id][varName];
@@ -796,8 +836,7 @@ Actions.getList = function(type, varName, cache) {
 			break;
 		case 9:
 			return this.global[varName];
-			break;
-		default: 
+		default:
 			break;
 	}
 	return false;
@@ -808,7 +847,6 @@ Actions.getVariable = function(type, varName, cache) {
 	switch(type) {
 		case 1:
 			return cache.temp[varName];
-			break;
 		case 2:
 			if(server && this.server[server.id]) {
 				return this.server[server.id][varName];
@@ -816,7 +854,6 @@ Actions.getVariable = function(type, varName, cache) {
 			break;
 		case 3:
 			return this.global[varName];
-			break;
 		default:
 			break;
 	}
@@ -897,6 +934,18 @@ Actions.executeResults = function(result, data, cache) {
 	}
 };
 
+Actions.dest = function(obj, ...props) {
+	if (typeof obj !== "object") return obj;
+
+	let main = obj;
+	for (const prop of props) {
+		if (!main || !prop) return main;
+		main = main[prop];
+	}
+
+	return main;
+};
+
 //---------------------------------------------------------------------
 // Events
 // Handles the various events that occur.
@@ -907,7 +956,7 @@ const Events = DBM.Events = {};
 let $evts = null;
 
 Events.data = [
-	[],[],[],[],['guildCreate', 0, 0, 1],['guildDelete', 0, 0, 1],['guildMemberAdd', 1, 0, 2],['guildMemberRemove', 1, 0, 2],['channelCreate', 1, 0, 2, true, 'arg1.type !== \'text\''],['channelDelete', 1, 0, 2, true, 'arg1.type !== \'text\''],['roleCreate', 1, 0, 2],['roleDelete', 1, 0, 2],['guildBanAdd', 3, 0, 1],['guildBanRemove', 3, 0, 1],['channelCreate', 1, 0, 2, true, 'arg1.type !== \'voice\''],['channelDelete', 1, 0, 2, true, 'arg1.type !== \'voice\''],['emojiCreate', 1, 0, 2],['emojiDelete', 1, 0, 2],['messageDelete', 1, 0, 2, true],['guildUpdate', 1, 3, 3],['guildMemberUpdate', 1, 3, 4],['presenceUpdate', 1, 3, 4],['voiceStateUpdate', 1, 3, 4],['channelUpdate', 1, 3, 4, true],['channelPinsUpdate', 1, 0, 2, true],['roleUpdate', 1, 3, 4],['messageUpdate', 1, 3, 4, true, 'arg2.content.length === 0'],['emojiUpdate', 1, 3, 4],[],[],['messageReactionRemoveAll', 1, 0, 2, true],['guildMemberAvailable', 1, 0, 2],['guildMembersChunk', 1, 0, 3],['guildMemberSpeaking', 1, 3, 2],[],[],['guildUnavailable', 1, 0, 1]
+	[], [], [], [], ["guildCreate", 0, 0, 1], ["guildDelete", 0, 0, 1], ["guildMemberAdd", 1, 0, 2], ["guildMemberRemove", 1, 0, 2], ["channelCreate", 1, 0, 2, true, "arg1.type !== 'text'"], ["channelDelete", 1, 0, 2, true, "arg1.type !== 'text'"], ["roleCreate", 1, 0, 2], ["roleDelete", 1, 0, 2], ["guildBanAdd", 3, 0, 1], ["guildBanRemove", 3, 0, 1], ["channelCreate", 1, 0, 2, true, "arg1.type !== 'voice'"], ["channelDelete", 1, 0, 2, true, "arg1.type !== 'voice'"], ["emojiCreate", 1, 0, 2], ["emojiDelete", 1, 0, 2], ["messageDelete", 1, 0, 2, true], ["guildUpdate", 1, 3, 3], ["guildMemberUpdate", 1, 3, 4], ["presenceUpdate", 1, 3, 4], ["voiceStateUpdate", 1, 3, 4], ["channelUpdate", 1, 3, 4, true], ["channelPinsUpdate", 1, 0, 2, true], ["roleUpdate", 1, 3, 4], ["messageUpdate", 1, 3, 4, true, "arg2.content.length === 0"], ["emojiUpdate", 1, 3, 4], [], [], ["messageReactionRemoveAll", 1, 0, 2, true], ["guildMemberAvailable", 1, 0, 2], ["guildMembersChunk", 1, 0, 3], ["guildMemberSpeaking", 1, 3, 2], [], [], ["guildUnavailable", 1, 0, 1], ["inviteCreate", 1, 0, 2], ["inviteDelete", 1, 0, 2], ["webhookUpdate", 1, 0, 1]
 ];
 
 Events.registerEvents = function(bot) {
@@ -918,10 +967,10 @@ Events.registerEvents = function(bot) {
 			bot.on(d[0], this.callEvents.bind(this, String(i), d[1], d[2], d[3], !!d[4], d[5]));
 		}
 	}
-	if($evts["28"]) bot.on('messageReactionAdd', this.onReaction.bind(this, "28"));
-	if($evts["29"]) bot.on('messageReactionRemove', this.onReaction.bind(this, "29"));
-	if($evts["34"]) bot.on('typingStart', this.onTyping.bind(this, "34"));
-	if($evts["35"]) bot.on('typingStop', this.onTyping.bind(this, "35"));
+	if($evts["28"]) bot.on("messageReactionAdd", this.onReaction.bind(this, "28"));
+	if($evts["29"]) bot.on("messageReactionRemove", this.onReaction.bind(this, "29"));
+	if($evts["34"]) bot.on("typingStart", this.onTyping.bind(this, "34"));
+	if($evts["35"]) bot.on("typingStop", this.onTyping.bind(this, "35"));
 };
 
 Events.callEvents = function(id, temp1, temp2, server, mustServe, condition, arg1, arg2) {
@@ -956,7 +1005,7 @@ Events.onInitialization = function(bot) {
 	for(let i = 0; i < events.length; i++) {
 		const event = events[i];
 		const temp = {};
-		const servers = bot.guilds.array();
+		const servers = bot.guilds.cache.array();
 		for(let i = 0; i < servers.length; i++) {
 			const server = servers[i];
 			if(server) {
@@ -973,7 +1022,7 @@ Events.setupIntervals = function(bot) {
 		const temp = {};
 		const time = event.temp ? parseFloat(event.temp) : 60;
 		bot.setInterval(function() {
-			const servers = bot.guilds.array();
+			const servers = bot.guilds.cache.array();
 			for(let i = 0; i < servers.length; i++) {
 				const server = servers[i];
 				if(server) {
@@ -1033,17 +1082,17 @@ Events.onError = function(text, text2, cache) {
 // Contains functions for image management.
 //---------------------------------------------------------------------
 
-const JIMP = require('jimp');
+const JIMP = require("jimp");
 
 const Images = DBM.Images = {};
 
 Images.getImage = function(url) {
-	if(!url.startsWith('http')) url = Actions.getLocalFile(url);
-	return JIMP.read(url);	
+	if(!url.startsWith("http")) url = Actions.getLocalFile(url);
+	return JIMP.read(url);
 };
 
 Images.getFont = function(url) {
-	return JIMP.loadFont(Actions.getLocalFile(url));	
+	return JIMP.loadFont(Actions.getLocalFile(url));
 };
 
 Images.createBuffer = function(image) {
@@ -1081,66 +1130,50 @@ const Files = DBM.Files = {};
 
 Files.data = {};
 Files.writers = {};
-Files.crypto = require('crypto');
+Files.crypto = require("crypto");
 Files.dataFiles = [
-	'commands.json',
-	'events.json',
-	'settings.json',
-	'players.json',
-	'servers.json',
-	'serverVars.json',
-	'globalVars.json'
+	"commands.json",
+	"events.json",
+	"settings.json",
+	"players.json",
+	"servers.json",
+	"serverVars.json",
+	"globalVars.json"
 ];
 
 Files.startBot = function() {
-	const fs = require('fs');
-	const path = require('path');
-	if(process.env['IsDiscordBotMakerTest'] === 'true') {
-		Actions.location = process.env['ActionsDirectory'];
-		this.initBotTest();
-	} else if(process.argv.length >= 3 && fs.existsSync(process.argv[2])) {
-		Actions.location = process.argv[2];
-	} else {
-		Actions.location = path.join(process.cwd(), 'actions')
-	}
-	if(typeof Actions.location === 'string' && fs.existsSync(Actions.location)) {
+	const path = require("path");
+	Actions.actionsLocation = path.join(__dirname, "actions");
+	Actions.eventsLocation = path.join(__dirname, "events");
+	Actions.extensionsLocation = path.join(__dirname, "extensions");
+	if(this.verifyDirectory(Actions.actionsLocation)) {
 		Actions.initMods();
 		this.readData(Bot.init.bind(Bot));
 	} else {
-		console.error('Veuillez copier le dossier "Actions" de DBM vers le dossier du bot:  \n' + Actions.location);
+		console.error("Veuillez copier le dossier \"Actions\" de DBM vers le dossier du bot: \n" + Actions.actionsLocation);
 	}
 };
 
-Files.initBotTest = function(content) {
-	this._console_log = console.log;
-	console.log = function() {
-		process.send(String(arguments[0]));
-		Files._console_log.apply(this, arguments);
-	};
-
-	this._console_error = console.error;
-	console.error = function() {
-		process.send(String(arguments[0]));
-		Files._console_error.apply(this, arguments);
-	};
+Files.verifyDirectory = function(dir) {
+	return typeof dir === "string" && require("fs").existsSync(dir);
 };
 
 Files.readData = function(callback) {
-	const fs = require('fs');
-	const path = require('path');
+	const fs = require("fs");
+	const path = require("path");
 	let max = this.dataFiles.length;
 	let cur = 0;
 	for(let i = 0; i < max; i++) {
-		const filePath = path.join(process.cwd(), 'data', this.dataFiles[i]);
+		const filePath = path.join(process.cwd(), "data", this.dataFiles[i]);
 		if(!fs.existsSync(filePath)) continue;
 		fs.readFile(filePath, function(error, content) {
 			const filename = this.dataFiles[i].slice(0, -5);
 			let data;
 			try {
-				if(typeof content !== 'string' && content.toString) content = content.toString();
+				if(typeof content !== "string" && content.toString) content = content.toString();
 				data = JSON.parse(this.decrypt(content));
 			} catch(e) {
-				console.error(`Il y a eu un problème en analysant ${this.dataFiles[i]} !`);
+				console.error(`Il y a eu un problème en analysant ${this.dataFiles[i]}!`);
 				return;
 			}
 			this.data[filename] = data;
@@ -1152,12 +1185,11 @@ Files.readData = function(callback) {
 };
 
 Files.saveData = function(file, callback) {
-	const fs = require('fs');
-	const path = require('path');
+	const path = require("path");
 	const data = this.data[file];
 	if(!this.writers[file]) {
-		const fstorm = require('fstorm');
-		this.writers[file] = fstorm(path.join(process.cwd(), 'data', file + '.json'))
+		const fstorm = require("fstorm");
+		this.writers[file] = fstorm(path.join(process.cwd(), "data", file + ".json"));
 	}
 	this.writers[file].write(this.encrypt(JSON.stringify(data)), function() {
 		if(callback) {
@@ -1168,25 +1200,25 @@ Files.saveData = function(file, callback) {
 
 Files.initEncryption = function() {
 	try {
-		this.password = require('discord-bot-maker');
+		this.password = require("discord-bot-maker");
 	} catch(e) {
-		this.password = '';
+		this.password = "";
 	}
 };
 
 Files.encrypt = function(text) {
 	if(this.password.length === 0) return text;
-	const cipher = this.crypto.createCipher('aes-128-ofb', this.password);
-	let crypted = cipher.update(text, 'utf8', 'hex');
-	crypted += cipher.final('hex');
+	const cipher = this.crypto.createCipher("aes-128-ofb", this.password);
+	let crypted = cipher.update(text, "utf8", "hex");
+	crypted += cipher.final("hex");
 	return crypted;
 };
 
 Files.decrypt = function(text) {
 	if(this.password.length === 0) return text;
-	const decipher = this.crypto.createDecipher('aes-128-ofb', this.password);
-	let dec = decipher.update(text, 'hex', 'utf8');
-	dec += decipher.final('utf8');
+	const decipher = this.crypto.createDecipher("aes-128-ofb", this.password);
+	let dec = decipher.update(text, "hex", "utf8");
+	dec += decipher.final("utf8");
 	return dec;
 };
 
@@ -1198,12 +1230,12 @@ Files.convertItem = function(item) {
 			result[i] = this.convertItem(item[i]);
 		}
 		return result;
-	} else if(typeof item !== 'object') {
-		let result = '';
+	} else if(typeof item !== "object") {
+		let result = "";
 		try {
 			result = JSON.stringify(item);
-		} catch(e) {}
-		if(result !== '{}') {
+		} catch {}
+		if(result !== "{}") {
 			return item;
 		}
 	} else if(item.convertToString) {
@@ -1220,7 +1252,7 @@ Files.saveServerVariable = function(serverID, varName, item) {
 	if(strItem !== null) {
 		this.data.serverVars[serverID][varName] = strItem;
 	}
-	this.saveData('serverVars');
+	this.saveData("serverVars");
 };
 
 Files.restoreServerVariables = function() {
@@ -1238,7 +1270,7 @@ Files.saveGlobalVariable = function(varName, item) {
 	if(strItem !== null) {
 		this.data.globalVars[varName] = strItem;
 	}
-	this.saveData('globalVars');
+	this.saveData("globalVars");
 };
 
 Files.restoreGlobalVariables = function() {
@@ -1252,11 +1284,9 @@ Files.restoreVariable = function(value, type, varName, serverId) {
 	const bot = Bot.bot;
 	let cache = {};
 	if(serverId) {
-		cache.server = {
-			id: serverId
-		};
+		cache.server = { id: serverId };
 	}
-	if(typeof value === 'string' || Array.isArray(value)) {
+	if(typeof value === "string" || Array.isArray(value)) {
 		this.restoreValue(value, bot).then(function(finalValue) {
 			if(finalValue) {
 				Actions.storeValue(finalValue, type, varName, cache);
@@ -1269,22 +1299,22 @@ Files.restoreVariable = function(value, type, varName, serverId) {
 
 Files.restoreValue = function(value, bot) {
 	return new Promise(function(resolve, reject) {
-		if(typeof value === 'string') {
-			if(value.startsWith('mem-')) {
+		if(typeof value === "string") {
+			if(value.startsWith("mem-")) {
 				return resolve(this.restoreMember(value, bot));
-			} else if(value.startsWith('msg-')) {
+			} else if(value.startsWith("msg-")) {
 				return this.restoreMessage(value, bot).then(resolve).catch(reject);
-			} else if(value.startsWith('tc-')) {
+			} else if(value.startsWith("tc-")) {
 				return resolve(this.restoreTextChannel(value, bot));
-			} else if(value.startsWith('vc-')) {
+			} else if(value.startsWith("vc-")) {
 				return resolve(this.restoreVoiceChannel(value, bot));
-			} else if(value.startsWith('r-')) {
+			} else if(value.startsWith("r-")) {
 				return resolve(this.restoreRole(value, bot));
-			} else if(value.startsWith('s-')) {
+			} else if(value.startsWith("s-")) {
 				return resolve(this.restoreServer(value, bot));
-			} else if(value.startsWith('e-')) {
+			} else if(value.startsWith("e-")) {
 				return resolve(this.restoreEmoji(value, bot));
-			} else if(value.startsWith('usr-')) {
+			} else if(value.startsWith("usr-")) {
 				return resolve(this.restoreUser(value, bot));
 			}
 			resolve(value);
@@ -1304,70 +1334,66 @@ Files.restoreValue = function(value, bot) {
 					}
 				});
 			}
+		} else {
+			resolve(value);
 		}
 	}.bind(this));
 };
 
 Files.restoreMember = function(value, bot) {
-	const split = value.split('_');
+	const split = value.split("_");
 	const memId = split[0].slice(4);
 	const serverId = split[1].slice(2);
 	const server = bot.guilds.get(serverId);
-	if(server && server.members) {
-		const member = server.members.get(memId);
+	if(server && server.members && server.members.cache) {
+		const member = server.members.cache.get(memId);
 		return member;
 	}
 };
 
 Files.restoreMessage = function(value, bot) {
-	const split = value.split('_');
+	const split = value.split("_");
 	const msgId = split[0].slice(4);
 	const channelId = split[1].slice(2);
-	const channel = bot.channels.get(channelId);
-	if(channel && channel.fetchMessage) {
-		return channel.fetchMessage(msgId);
+	const channel = bot.channels.cache.get(channelId);
+	if(channel && channel.messages && channel.messages.fetch) {
+		return channel.messages.fetch(msgId);
 	}
 };
 
 Files.restoreTextChannel = function(value, bot) {
 	const channelId = value.slice(3);
-	const channel = bot.channels.get(channelId);
-	return channel;
+	return bot.channels.cache.get(channelId);
 };
 
 Files.restoreVoiceChannel = function(value, bot) {
 	const channelId = value.slice(3);
-	const channel = bot.channels.get(channelId);
-	return channel;
+	return bot.channels.cache.get(channelId);
 };
 
 Files.restoreRole = function(value, bot) {
-	const split = value.split('_');
+	const split = value.split("_");
 	const roleId = split[0].slice(2);
 	const serverId = split[1].slice(2);
-	const server = bot.guilds.get(serverId);
-	if(server && server.roles) {
-		const role = server.roles.get(roleId);
-		return role;
+	const server = bot.guilds.cache.get(serverId);
+	if(server && server.roles && server.roles.cache) {
+		return server.roles.cache.get(roleId);
 	}
 };
 
 Files.restoreServer = function(value, bot) {
 	const serverId = value.slice(2);
-	const server = bot.guilds.get(serverId);
-	return server;
+	return bot.guilds.cache.get(serverId);
 };
 
 Files.restoreEmoji = function(value, bot) {
 	const emojiId = value.slice(2);
-	const emoji = bot.emojis.get(emojiId);
-	return emoji;
+	return bot.emojis.cache.get(emojiId);
 };
 
 Files.restoreUser = function(value, bot) {
 	const userId = value.slice(4);
-	const user = bot.users.get(userId);
-	return user;
+	return bot.users.cache.get(userId);
 };
 
 Files.initEncryption();
@@ -1381,8 +1407,8 @@ const Audio = DBM.Audio = {};
 
 Audio.ytdl = null;
 try {
-	Audio.ytdl = require('ytdl-core');
-} catch(e) {}
+	Audio.ytdl = require("ytdl-core");
+} catch {}
 
 Audio.queue = [];
 Audio.volumes = [];
@@ -1414,7 +1440,7 @@ Audio.connectToVoice = function(voiceChannel) {
 	const promise = voiceChannel.join();
 	promise.then(function(connection) {
 		this.connections[voiceChannel.guild.id] = connection;
-		connection.on('disconnect', function() {
+		connection.on("disconnect", function() {
 			this.connections[voiceChannel.guild.id] = null;
 			this.volumes[voiceChannel.guild.id] = null;
 		}.bind(this));
@@ -1439,7 +1465,8 @@ Audio.clearQueue = function(cache) {
 Audio.playNext = function(id, forceSkip) {
 	if(!this.connections[id]) return;
 	if(!this.dispatchers[id] || !!forceSkip) {
-		if(this.queue[id].length > 0) {
+		if(!this.queue[id]) this.queue[id] = [];
+		if(this.queue[id] && this.queue[id].length > 0) {
 			const item = this.queue[id].shift();
 			this.playItem(item, id);
 		} else {
@@ -1452,23 +1479,25 @@ Audio.playItem = function(item, id) {
 	if(!this.connections[id]) return;
 	if(this.dispatchers[id]) {
 		this.dispatchers[id]._forceEnd = true;
-		this.dispatchers[id].end();
+		this.dispatchers[id].destroy();
 	}
+
 	const type = item[0];
 	let setupDispatcher = false;
 	switch(type) {
-		case 'file':
+		case "file":
 			setupDispatcher = this.playFile(item[2], item[1], id);
 			break;
-		case 'url':
+		case "url":
 			setupDispatcher = this.playUrl(item[2], item[1], id);
 			break;
-		case 'yt':
+		case "yt":
 			setupDispatcher = this.playYt(item[2], item[1], id);
 			break;
 	}
+
 	if(setupDispatcher && !this.dispatchers[id]._eventSetup) {
-		this.dispatchers[id].on('end', function() {
+		this.dispatchers[id].on("finish", function() {
 			const isForced = this.dispatchers[id]._forceEnd;
 			this.dispatchers[id] = null;
 			if(!isForced) {
@@ -1480,21 +1509,24 @@ Audio.playItem = function(item, id) {
 };
 
 Audio.playFile = function(url, options, id) {
-	this.dispatchers[id] = this.connections[id].playFile(Actions.getLocalFile(url), options);
+	this.dispatchers[id] = this.connections[id].play(Actions.getLocalFile(url), options);
 	return true;
 };
 
 Audio.playUrl = function(url, options, id) {
-	this.dispatchers[id] = this.connections[id].playArbitraryInput(url, options);
+	this.dispatchers[id] = this.connections[id].play(url, options);
 	return true;
 };
 
 Audio.playYt = function(url, options, id) {
 	if(!this.ytdl) return false;
 	const stream = this.ytdl(url, {
-		filter: 'audioonly'
+		quality: "highestaudio",
+		filter: "audioonly",
+		highWaterMark: 26214400 // 25mb
 	});
-	this.dispatchers[id] = this.connections[id].playStream(stream, options);
+	options.highWaterMark = 1;
+	this.dispatchers[id] = this.connections[id].play(stream, options);
 	return true;
 };
 
@@ -1502,173 +1534,312 @@ Audio.playYt = function(url, options, id) {
 // GuildMember
 //---------------------------------------------------------------------
 
-const GuildMember = DiscordJS.GuildMember;
+const { Structures } = DiscordJS;
 
-GuildMember.prototype.unban = function(server, reason) {
-	return server.unban(this.author, reason);
-};
+Structures.extend("GuildMember", (GuildMember) => class extends GuildMember {
+	constructor(client, data, guild) {
+		super(client, data, guild);
+	}
 
-GuildMember.prototype.data = function(name, defaultValue) {
-	const id = this.id;
-	const data = Files.data.players;
-	if(data[id] === undefined) {
-		if(defaultValue === undefined) {
-			return null;
-		} else {
+	unban(server, reason) {
+		return server.members.unban(this.author, reason);
+	}
+
+	data(name, defaultValue) {
+		const id = this.id;
+		const data = Files.data.players;
+		if(data[id] === undefined) {
+			if(defaultValue === undefined) {
+				return null;
+			} else {
+				data[id] = {};
+			}
+		}
+		if(data[id][name] === undefined && defaultValue !== undefined) {
+			data[id][name] = defaultValue;
+		}
+		return data[id][name];
+	}
+
+	setData(name, value) {
+		const id = this.id;
+		const data = Files.data.players;
+		if(data[id] === undefined) {
 			data[id] = {};
 		}
+		data[id][name] = value;
+		Files.saveData("players");
 	}
-	if(data[id][name] === undefined && defaultValue !== undefined) {
-		data[id][name] = defaultValue;
-	}
-	return data[id][name];
-};
 
-GuildMember.prototype.setData = function(name, value) {
-	const id = this.id;
-	const data = Files.data.players;
-	if(data[id] === undefined) {
-		data[id] = {};
+	addData(name, value) {
+		const id = this.id;
+		const data = Files.data.players;
+		if(data[id] === undefined) {
+			data[id] = {};
+		}
+		if(data[id][name] === undefined) {
+			this.setData(name, value);
+		} else {
+			this.setData(name, this.data(name) + value);
+		}
 	}
-	data[id][name] = value;
-	Files.saveData('players');
-};
 
-GuildMember.prototype.addData = function(name, value) {
-	const id = this.id;
-	const data = Files.data.players;
-	if(data[id] === undefined) {
-		data[id] = {};
+	convertToString() {
+		return `mem-${this.id}_s-${this.guild.id}`;
 	}
-	if(data[id][name] === undefined) {
-		this.setData(name, value);
-	} else {
-		this.setData(name, this.data(name) + value);
-	}
-};
-
-GuildMember.prototype.convertToString = function() {
-	return `mem-${this.id}_s-${this.guild.id}`;
-};
+});
 
 //---------------------------------------------------------------------
 // User
 //---------------------------------------------------------------------
 
-const User = DiscordJS.User;
+Structures.extend("User", (User) => class extends User {
+	constructor(client, data) {
+		super(client, data);
+	}
 
-User.prototype.data = GuildMember.prototype.data;
-User.prototype.setData = GuildMember.prototype.setData;
-User.prototype.addData = GuildMember.prototype.addData;
+	data(name, defaultValue) {
+		const id = this.id;
+		const data = Files.data.players;
+		if(data[id] === undefined) {
+			if(defaultValue === undefined) {
+				return null;
+			} else {
+				data[id] = {};
+			}
+		}
+		if(data[id][name] === undefined && defaultValue !== undefined) {
+			data[id][name] = defaultValue;
+		}
+		return data[id][name];
+	}
 
-User.prototype.convertToString = function() {
-	return `usr-${this.id}`;
-};
+	setData(name, value) {
+		const id = this.id;
+		const data = Files.data.players;
+		if(data[id] === undefined) {
+			data[id] = {};
+		}
+		data[id][name] = value;
+		Files.saveData("players");
+	}
+
+	addData(name, value) {
+		const id = this.id;
+		const data = Files.data.players;
+		if(data[id] === undefined) {
+			data[id] = {};
+		}
+		if(data[id][name] === undefined) {
+			this.setData(name, value);
+		} else {
+			this.setData(name, this.data(name) + value);
+		}
+	}
+
+	convertToString() {
+		return `usr-${this.id}`;
+	}
+});
 
 //---------------------------------------------------------------------
 // Guild
 //---------------------------------------------------------------------
 
-const Guild = DiscordJS.Guild;
-
-Guild.prototype.getDefaultChannel = function() {
-	let channel = this.channels.get(this.id);
-	if(!channel) {
-		this.channels.array().forEach(function(c) {
-			if(c.type !== 'voice') {
-				if(!channel) {
-					channel = c;
-				} else if(channel.position > c.position) {
-					channel = c;
-				}
-			}
-		});
+Structures.extend("Guild", (Guild) => class extends Guild {
+	constructor(client, data) {
+		super(client, data);
 	}
-	return channel;
-};
 
-Guild.prototype.data = function(name, defaultValue) {
-	const id = this.id;
-	const data = Files.data.servers;
-	if(data[id] === undefined) {
-		if(defaultValue === undefined) {
-			return null;
-		} else {
+	getDefaultChannel() {
+		let channel = this.channels.cache.get(this.id);
+		if(!channel) {
+			this.channels.cache.array().forEach(function(c) {
+				if(c.permissionsFor(DBM.Bot.bot.user).has("SEND_MESSAGES") && c.type !== "voice" && c.type !== "category") {
+					if(!channel) {
+						channel = c;
+					} else if(channel.position > c.position) {
+						channel = c;
+					}
+				}
+			});
+		}
+		return channel;
+	}
+
+	data(name, defaultValue) {
+		const id = this.id;
+		const data = Files.data.servers;
+		if(data[id] === undefined) {
+			if(defaultValue === undefined) {
+				return null;
+			} else {
+				data[id] = {};
+			}
+		}
+		if(data[id][name] === undefined && defaultValue !== undefined) {
+			data[id][name] = defaultValue;
+		}
+		return data[id][name];
+	}
+
+	setData(name, value) {
+		const id = this.id;
+		const data = Files.data.servers;
+		if(data[id] === undefined) {
 			data[id] = {};
 		}
+		data[id][name] = value;
+		Files.saveData("servers");
 	}
-	if(data[id][name] === undefined && defaultValue !== undefined) {
-		data[id][name] = defaultValue;
-	}
-	return data[id][name];
-};
 
-Guild.prototype.setData = function(name, value) {
-	const id = this.id;
-	const data = Files.data.servers;
-	if(data[id] === undefined) {
-		data[id] = {};
+	addData(name, value) {
+		const id = this.id;
+		const data = Files.data.servers;
+		if(data[id] === undefined) {
+			data[id] = {};
+		}
+		if(data[id][name] === undefined) {
+			this.setData(name, value);
+		} else {
+			this.setData(name, this.data(name) + value);
+		}
 	}
-	data[id][name] = value;
-	Files.saveData('servers');
-};
 
-Guild.prototype.addData = function(name, value) {
-	const id = this.id;
-	const data = Files.data.servers;
-	if(data[id] === undefined) {
-		data[id] = {};
+	convertToString() {
+		return `s-${this.id}`;
 	}
-	if(data[id][name] === undefined) {
-		this.setData(name, value);
-	} else {
-		this.setData(name, this.data(name) + value);
-	}
-};
-
-Guild.prototype.convertToString = function() {
-	return `s-${this.id}`;
-};
+});
 
 //---------------------------------------------------------------------
 // Message
 //---------------------------------------------------------------------
 
-DiscordJS.Message.prototype.convertToString = function() {
-	return `msg-${this.id}_c-${this.channel.id}`;
-};
+Structures.extend("Message", (Message) => class extends Message {
+	constructor(client, data, channel) {
+		super(client, data, channel);
+	}
+
+	convertToString() {
+		return `msg-${this.id}_c-${this.channel.id}`;
+	}
+});
 
 //---------------------------------------------------------------------
 // TextChannel
 //---------------------------------------------------------------------
 
-DiscordJS.TextChannel.prototype.convertToString = function() {
-	return `tc-${this.id}`;
-};
+Structures.extend("TextChannel", (TextChannel) => class extends TextChannel {
+	constructor(guild, data) {
+		super(guild, data);
+	}
+
+	overwritePerms(memberOrRole, permissions, reason) {
+		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
+		if (overwrites) return overwrites.update(permissions, reason);
+		return this.createOverwrite(memberOrRole, permissions, reason);
+	}
+
+	convertToString() {
+		return `tc-${this.id}`;
+	}
+});
 
 //---------------------------------------------------------------------
 // VoiceChannel
 //---------------------------------------------------------------------
 
-DiscordJS.VoiceChannel.prototype.convertToString = function() {
-	return `vc-${this.id}`;
-};
+Structures.extend("VoiceChannel", (VoiceChannel) => class extends VoiceChannel {
+	constructor(guild, data) {
+		super(guild, data);
+	}
+
+	overwritePerms(memberOrRole, permissions, reason) {
+		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
+		if (overwrites) return overwrites.update(permissions, reason);
+		return this.createOverwrite(memberOrRole, permissions, reason);
+	}
+
+	convertToString() {
+		return `vc-${this.id}`;
+	}
+});
+
+//---------------------------------------------------------------------
+// CategoryChannel
+//---------------------------------------------------------------------
+
+Structures.extend("CategoryChannel", (CategoryChannel) => class extends CategoryChannel {
+	constructor(guild, data) {
+		super(guild, data);
+	}
+
+	overwritePerms(memberOrRole, permissions, reason) {
+		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
+		if (overwrites) return overwrites.update(permissions, reason);
+		return this.createOverwrite(memberOrRole, permissions, reason);
+	}
+});
+
+//---------------------------------------------------------------------
+// NewsChannel
+//---------------------------------------------------------------------
+
+Structures.extend("NewsChannel", (NewsChannel) => class extends NewsChannel {
+	constructor(guild, data) {
+		super(guild, data);
+	}
+
+	overwritePerms(memberOrRole, permissions, reason) {
+		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
+		if (overwrites) return overwrites.update(permissions, reason);
+		return this.createOverwrite(memberOrRole, permissions, reason);
+	}
+});
+
+//---------------------------------------------------------------------
+// StoreChannel
+//---------------------------------------------------------------------
+
+Structures.extend("StoreChannel", (StoreChannel) => class extends StoreChannel {
+	constructor(guild, data) {
+		super(guild, data);
+	}
+
+	overwritePerms(memberOrRole, permissions, reason) {
+		const overwrites = this.permissionOverwrites.get(memberOrRole.id);
+		if (overwrites) return overwrites.update(permissions, reason);
+		return this.createOverwrite(memberOrRole, permissions, reason);
+	}
+});
 
 //---------------------------------------------------------------------
 // Role
 //---------------------------------------------------------------------
 
-DiscordJS.Role.prototype.convertToString = function() {
-	return `r-${this.id}_s-${this.guild.id}`;
-};
+Structures.extend("Role", (Role) => class extends Role {
+	constructor(client, data, guild) {
+		super(client, data, guild);
+	}
+
+	convertToString() {
+		return `r-${this.id}_s-${this.guild.id}`;
+	}
+});
 
 //---------------------------------------------------------------------
 // Emoji
 //---------------------------------------------------------------------
 
-DiscordJS.Emoji.prototype.convertToString = function() {
-	return `e-${this.id}`;
-};
+Structures.extend("GuildEmoji", (GuildEmoji) => class extends GuildEmoji {
+	constructor(client, data, guild) {
+		super(client, data, guild);
+	}
+
+	convertToString() {
+		return `e-${this.id}`;
+	}
+});
 
 //---------------------------------------------------------------------
 // Start Bot

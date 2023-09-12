@@ -1,129 +1,156 @@
 module.exports = {
+  //---------------------------------------------------------------------
+  // Action Name
+  //
+  // This is the name of the action displayed in the editor.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Name
-//
-// This is the name of the action displayed in the editor.
-//---------------------------------------------------------------------
+  name: "Vérifier les autorisations des membres",
 
-name: "Vérifier la permission de l'utilisateur",
+  //---------------------------------------------------------------------
+  // Action Section
+  //
+  // This is the section the action will fall into.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Section
-//
-// This is the section the action will fall into.
-//---------------------------------------------------------------------
+  section: "Conditions",
 
-section: "Conditions",
+  //---------------------------------------------------------------------
+  // Action Subtitle
+  //
+  // This function generates the subtitle displayed next to the name.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Subtitle
-//
-// This function generates the subtitle displayed next to the name.
-//---------------------------------------------------------------------
+  subtitle(data, presets) {
+    return `${presets.getConditionsText(data)}`;
+  },
 
-subtitle: function(data) {
-	const results = ["Continue Actions", "Stop Action Sequence", "Jump To Action", "Jump Forward Actions"];
-	return `Si vrai: ${results[parseInt(data.iftrue)]} ~ Si faux: ${results[parseInt(data.iffalse)]}`;
-},
+  //---------------------------------------------------------------------
+  // Action Meta Data
+  //
+  // Helps check for updates and provides info if a custom mod.
+  // If this is a third-party mod, please set "author" and "authorUrl".
+  //
+  // It's highly recommended "preciseCheck" is set to false for third-party mods.
+  // This will make it so the patch version (0.0.X) is not checked.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Fields
-//
-// These are the fields for the action. These fields are customized
-// by creating elements with corresponding IDs in the HTML. These
-// are also the names of the fields stored in the action's JSON data.
-//---------------------------------------------------------------------
+  meta: { version: "2.1.7", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
-fields: ["member", "varName", "permission", "iftrue", "iftrueVal", "iffalse", "iffalseVal"],
+  //---------------------------------------------------------------------
+  // Action Fields
+  //
+  // These are the fields for the action. These fields are customized
+  // by creating elements with corresponding IDs in the HTML. These
+  // are also the names of the fields stored in the action's JSON data.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Command HTML
-//
-// This function returns a string containing the HTML used for
-// editting actions. 
-//
-// The "isEvent" parameter will be true if this action is being used
-// for an event. Due to their nature, events lack certain information, 
-// so edit the HTML to reflect this.
-//
-// The "data" parameter stores constants for select elements to use. 
-// Each is an array: index 0 for commands, index 1 for events.
-// The names are: sendTargets, members, roles, channels, 
-//                messages, servers, variables
-//---------------------------------------------------------------------
+  fields: ["member", "varName", "permission", "branch"],
 
-html: function(isEvent, data) {
-	return `
-<div>
-	<div style="float: left; width: 35%;">
-		Utilisateur source:<br>
-		<select id="member" class="round" onchange="glob.memberChange(this, 'varNameContainer')">
-			${data.members[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Nom de la variable:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+  //---------------------------------------------------------------------
+  // Command HTML
+  //
+  // This function returns a string containing the HTML used for
+  // editing actions.
+  //
+  // The "isEvent" parameter will be true if this action is being used
+  // for an event. Due to their nature, events lack certain information,
+  // so edit the HTML to reflect this.
+  //---------------------------------------------------------------------
+
+  html(isEvent, data) {
+    return `
+<member-input dropdownLabel="Source Member" selectId="member" variableContainerId="varNameContainer" variableInputId="varName"></member-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px; width: 80%;">
-	Permission:<br>
+	<span class="dbminputlabel">Permission</span><br>
 	<select id="permission" class="round">
 		${data.permissions[2]}
 	</select>
-</div><br>
-<div>
-	${data.conditions[0]}
-</div>`
-},
+</div>
 
-//---------------------------------------------------------------------
-// Action Editor Init Code
-//
-// When the HTML is first applied to the action editor, this code
-// is also run. This helps add modifications or setup reactionary
-// functions for the DOM elements.
-//---------------------------------------------------------------------
+<br>
 
-init: function() {
-	const {glob, document} = this;
+<hr class="subtlebar">
 
-	glob.memberChange(document.getElementById('member'), 'varNameContainer');
-	glob.onChangeTrue(document.getElementById('iftrue'));
-	glob.onChangeFalse(document.getElementById('iffalse'));
-},
+<br>
 
-//---------------------------------------------------------------------
-// Action Bot Function
-//
-// This is the function for the action within the Bot's Action class.
-// Keep in mind event calls won't have access to the "msg" parameter, 
-// so be sure to provide checks for variable existance.
-//---------------------------------------------------------------------
+<conditional-input id="branch"></conditional-input>`;
+  },
 
-action: function(cache) {
-	const data = cache.actions[cache.index];
-	const type = parseInt(data.member);
-	const varName = this.evalMessage(data.varName, cache);
-	const member = this.getMember(type, varName, cache);
-	let result = false;
-	if(member) {
-		result = member.permissions.has([data.permission]);
-	}
-	this.executeResults(result, data, cache);
-},
+  //---------------------------------------------------------------------
+  // Action Editor Pre-Init Code
+  //
+  // Before the fields from existing data in this action are applied
+  // to the user interface, this function is called if it exists.
+  // The existing data is provided, and a modified version can be
+  // returned. The returned version will be used if provided.
+  // This is to help provide compatibility with older versions of the action.
+  //
+  // The "formatters" argument contains built-in functions for formatting
+  // the data required for official DBM action compatibility.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Bot Mod
-//
-// Upon initialization of the bot, this code is run. Using the bot's
-// DBM namespace, one can add/modify existing functions if necessary.
-// In order to reduce conflictions between mods, be sure to alias
-// functions you wish to overwrite.
-//---------------------------------------------------------------------
+  preInit(data, formatters) {
+    return formatters.compatibility_2_0_0_iftruefalse_to_branch(data);
+  },
 
-mod: function(DBM) {
-}
+  //---------------------------------------------------------------------
+  // Action Editor Init Code
+  //
+  // When the HTML is first applied to the action editor, this code
+  // is also run. This helps add modifications or setup reactionary
+  // functions for the DOM elements.
+  //---------------------------------------------------------------------
 
-}; // End of module
+  init() {},
+
+  //---------------------------------------------------------------------
+  // Action Bot Function
+  //
+  // This is the function for the action within the Bot's Action class.
+  // Keep in mind event calls won't have access to the "msg" parameter,
+  // so be sure to provide checks for variable existence.
+  //---------------------------------------------------------------------
+
+  async action(cache) {
+    const data = cache.actions[cache.index];
+    const member = await this.getMemberFromData(data.member, data.varName, cache);
+    let result = false;
+    if (member) {
+      result = member.permissions.has([data.permission]);
+    }
+    this.executeResults(result, data?.branch ?? data, cache);
+  },
+
+  //---------------------------------------------------------------------
+  // Action Bot Mod Init
+  //
+  // An optional function for action mods. Upon the bot's initialization,
+  // each command/event's actions are iterated through. This is to
+  // initialize responses to interactions created within actions
+  // (e.g. buttons and select menus for Send Message).
+  //
+  // If an action provides inputs for more actions within, be sure
+  // to call the `this.prepareActions` function to ensure all actions are
+  // recursively iterated through.
+  //---------------------------------------------------------------------
+
+  modInit(data) {
+    this.prepareActions(data.branch?.iftrueActions);
+    this.prepareActions(data.branch?.iffalseActions);
+  },
+
+  //---------------------------------------------------------------------
+  // Action Bot Mod
+  //
+  // Upon initialization of the bot, this code is run. Using the bot's
+  // DBM namespace, one can add/modify existing functions if necessary.
+  // In order to reduce conflicts between mods, be sure to alias
+  // functions you wish to overwrite.
+  //---------------------------------------------------------------------
+
+  mod() {},
+};

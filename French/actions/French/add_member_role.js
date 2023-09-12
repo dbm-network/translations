@@ -1,142 +1,128 @@
 module.exports = {
+  //---------------------------------------------------------------------
+  // Action Name
+  //
+  // This is the name of the action displayed in the editor.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Name
-//
-// This is the name of the action displayed in the editor.
-//---------------------------------------------------------------------
+  name: "Ajouter un rôle à un membre",
 
-name: "Ajouter un rôle à un utilisateur",
+  //---------------------------------------------------------------------
+  // Action Section
+  //
+  // This is the section the action will fall into.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Section
-//
-// This is the section the action will fall into.
-//---------------------------------------------------------------------
+  section: "Contrôle des membres",
 
-section: "Contrôle d'utilisateur",
+  //---------------------------------------------------------------------
+  // Action Subtitle
+  //
+  // This function generates the subtitle displayed next to the name.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Subtitle
-//
-// This function generates the subtitle displayed next to the name.
-//---------------------------------------------------------------------
+  subtitle(data, presets) {
+    return `${presets.getMemberText(data.member, data.varName2)} - ${presets.getRoleText(data.role, data.varName)}`;
+  },
 
-subtitle: function(data) {
-	const roles = ['Mentioned Role', '1st Author Role', '1st Server Role', 'Temp Variable', 'Server Variable', 'Global Variable'];
-	const channels = ['Mentioned User', 'Command Author', 'Temp Variable', 'Server Variable', 'Global Variable'];
-	return `${channels[parseInt(data.member)]} - ${roles[parseInt(data.role)]}`;
-},
+  //---------------------------------------------------------------------
+  // Action Meta Data
+  //
+  // Helps check for updates and provides info if a custom mod.
+  // If this is a third-party mod, please set "author" and "authorUrl".
+  //
+  // It's highly recommended "preciseCheck" is set to false for third-party mods.
+  // This will make it so the patch version (0.0.X) is not checked.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Fields
-//
-// These are the fields for the action. These fields are customized
-// by creating elements with corresponding IDs in the HTML. These
-// are also the names of the fields stored in the action's JSON data.
-//---------------------------------------------------------------------
+  meta: { version: "2.1.7", preciseCheck: true, author: null, authorUrl: null, downloadUrl: null },
 
-fields: ["member", "varName2", "role", "varName"],
+  //---------------------------------------------------------------------
+  // Action Fields
+  //
+  // These are the fields for the action. These fields are customized
+  // by creating elements with corresponding IDs in the HTML. These
+  // are also the names of the fields stored in the action's JSON data.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Command HTML
-//
-// This function returns a string containing the HTML used for
-// editting actions. 
-//
-// The "isEvent" parameter will be true if this action is being used
-// for an event. Due to their nature, events lack certain information, 
-// so edit the HTML to reflect this.
-//
-// The "data" parameter stores constants for select elements to use. 
-// Each is an array: index 0 for commands, index 1 for events.
-// The names are: sendTargets, members, roles, channels, 
-//                messages, servers, variables
-//---------------------------------------------------------------------
+  fields: ["member", "varName2", "role", "varName", "reason"],
 
-html: function(isEvent, data) {
-	return `
-<div>
-	<div style="float: left; width: 35%;">
-		Rôle source:<br>
-		<select id="role" class="round" onchange="glob.roleChange(this, 'varNameContainer')">
-			${data.roles[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
-		Nom de la variable:<br>
-		<input id="varName" class="round" type="text" list="variableList"><br>
-	</div>
-</div><br><br><br>
+  //---------------------------------------------------------------------
+  // Command HTML
+  //
+  // This function returns a string containing the HTML used for
+  // editing actions.
+  //
+  // The "isEvent" parameter will be true if this action is being used
+  // for an event. Due to their nature, events lack certain information,
+  // so edit the HTML to reflect this.
+  //---------------------------------------------------------------------
+
+  html(isEvent, data) {
+    return `
+<role-input dropdownLabel="Source Role" selectId="role" variableContainerId="varNameContainer" variableInputId="varName"></role-input>
+
+<br><br><br>
+
+<member-input style="padding-top: 8px;" dropdownLabel="Member" selectId="member" variableContainerId="varNameContainer2" variableInputId="varName2"></member-input>
+
+<br><br><br>
+
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Utilisateur:<br>
-		<select id="member" class="round" onchange="glob.memberChange(this, 'varNameContainer2')">
-			${data.members[isEvent ? 1 : 0]}
-		</select>
-	</div>
-	<div id="varNameContainer2" style="display: none; float: right; width: 60%;">
-		Nom de la variable:<br>
-		<input id="varName2" class="round" type="text"><br>
-	</div>
+  <span class="dbminputlabel">Reason</span>
+  <input id="reason" placeholder="Optional" class="round" type="text">
 </div>`;
-},
+  },
 
-//---------------------------------------------------------------------
-// Action Editor Init Code
-//
-// When the HTML is first applied to the action editor, this code
-// is also run. This helps add modifications or setup reactionary
-// functions for the DOM elements.
-//---------------------------------------------------------------------
+  //---------------------------------------------------------------------
+  // Action Editor Init Code
+  //
+  // When the HTML is first applied to the action editor, this code
+  // is also run. This helps add modifications or setup reactionary
+  // functions for the DOM elements.
+  //---------------------------------------------------------------------
 
-init: function() {
-	const {glob, document} = this;
+  init() {},
 
-	glob.roleChange(document.getElementById('role'), 'varNameContainer');
-	glob.memberChange(document.getElementById('member'), 'varNameContainer2');
-},
+  //---------------------------------------------------------------------
+  // Action Bot Function
+  //
+  // This is the function for the action within the Bot's Action class.
+  // Keep in mind event calls won't have access to the "msg" parameter,
+  // so be sure to provide checks for variable existence.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Bot Function
-//
-// This is the function for the action within the Bot's Action class.
-// Keep in mind event calls won't have access to the "msg" parameter, 
-// so be sure to provide checks for variable existance.
-//---------------------------------------------------------------------
+  async action(cache) {
+    const data = cache.actions[cache.index];
+    const role = await this.getRoleFromData(data.role, data.varName, cache);
+    const member = await this.getMemberFromData(data.member, data.varName2, cache);
+    const reason = this.evalMessage(data.reason, cache);
+    if (Array.isArray(member)) {
+      this.callListFunc(
+        member.map((m) => m.roles),
+        "add",
+        [role, reason],
+      )
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
+    } else if (member?.roles) {
+      member.roles
+        .add(role, reason)
+        .then(() => this.callNextAction(cache))
+        .catch((err) => this.displayError(data, cache, err));
+    } else {
+      this.callNextAction(cache);
+    }
+  },
 
-action: function(cache) {
-	const data = cache.actions[cache.index];
-	const storage = parseInt(data.role);
-	const varName = this.evalMessage(data.varName, cache);
-	const role = this.getRole(storage, varName, cache);
-	const storage2 = parseInt(data.member);
-	const varName2 = this.evalMessage(data.varName2, cache);
-	const member = this.getMember(storage2, varName2, cache);
-	const funcName = Array.isArray(role) ? 'addRoles': 'addRole';
-	if(Array.isArray(member)) {
-		this.callListFunc(member, funcName, [role]).then(function() {
-			this.callNextAction(cache);
-		}.bind(this));
-	} else if(member && member[funcName]) {
-		member[funcName](role).then(function(member) {
-			this.callNextAction(cache);
-		}.bind(this)).catch(this.displayError.bind(this, data, cache));
-	} else {
-		this.callNextAction(cache);
-	}
-},
+  //---------------------------------------------------------------------
+  // Action Bot Mod
+  //
+  // Upon initialization of the bot, this code is run. Using the bot's
+  // DBM namespace, one can add/modify existing functions if necessary.
+  // In order to reduce conflicts between mods, be sure to alias
+  // functions you wish to overwrite.
+  //---------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Action Bot Mod
-//
-// Upon initialization of the bot, this code is run. Using the bot's
-// DBM namespace, one can add/modify existing functions if necessary.
-// In order to reduce conflictions between mods, be sure to alias
-// functions you wish to overwrite.
-//---------------------------------------------------------------------
-
-mod: function(DBM) {
-}
-
-}; // End of module
+  mod() {},
+};
