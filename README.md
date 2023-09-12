@@ -41,16 +41,6 @@ Translations are meant to be used on the beta version of Discord Bot Maker.
 4. If you wish to download all the translations, download this zip: [here](https://github.com/dbm-network/translations/archive/master.zip) otherwise, download the translation you want from [here](#current-translations) 
 5. Now copy the folder(s) you downloaded out of the zip file into the DBM folder (*Please overwrite existing ones*)
 
-### Installing beta
-
-**Before starting: if you have encryption enabled, please, disable it before switching to beta and get backup of the *data* folder from your project directory.**
-
-1. Close Discord Bot Maker
-2. Open your Steam Library and find Discord Bot Maker on the Software tab
-3. Right-click it → Properties → Betas
-4. Select beta in the drop-down menu (no key is required)
-5. DBM should update now. Otherwise restart Steam and restart the guide.
-
 ### Current translations
 
 To download a specific translation, click on the translation on the table below. If you want to download all the translations, follow the download steps in [here](#installing-translations)
