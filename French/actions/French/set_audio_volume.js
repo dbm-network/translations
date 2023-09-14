@@ -22,7 +22,7 @@ module.exports = {
   //---------------------------------------------------------------------
 
   subtitle(data, presets) {
-    return `Set Volume to ${data.volume}`;
+    return `Réglez le volume sur ${data.volume}`;
   },
 
   //---------------------------------------------------------------------

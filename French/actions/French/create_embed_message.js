@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Intégrer le message",
+  section: "Message Intégrer",
 
   //---------------------------------------------------------------------
   // Action Subtitle

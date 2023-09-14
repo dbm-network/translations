@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Vérifier les autorisations des membres",
+  name: "Vérifier les autorisations du membre",
 
   //---------------------------------------------------------------------
   // Action Section

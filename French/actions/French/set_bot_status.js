@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Contrôle du clients bot",
+  section: "Contrôle du client bot",
 
   //---------------------------------------------------------------------
   // Action Subtitle

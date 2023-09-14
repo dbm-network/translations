@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Ajouter un rôle à un membre",
+  name: "Ajouter un rôle de membre",
 
   //---------------------------------------------------------------------
   // Action Section

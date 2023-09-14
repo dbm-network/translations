@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Attendre",
+  name: "Attendez",
 
   //---------------------------------------------------------------------
   // Action Section

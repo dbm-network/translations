@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Transféré une variable",
+  name: "Transférer une variable",
 
   //---------------------------------------------------------------------
   // Action Section
