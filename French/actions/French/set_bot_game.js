@@ -13,7 +13,7 @@ module.exports = {
   // Overrides the name that appears in the editor.
   //---------------------------------------------------------------------
 
-  displayName: "Contrôle du clients bot",
+  displayName: "Set Bot Activity",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -21,7 +21,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Contrôle du clients bot",
+  section: "Contrôle du client bot",
 
   //---------------------------------------------------------------------
   // Action Subtitle

@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Vérifiez qu'il s'agit d'un robot dans le canal vocal",
+  name: "Vérifiez qu'il s'agit d'un bot dans le canal vocal",
 
   //---------------------------------------------------------------------
   // Action Section

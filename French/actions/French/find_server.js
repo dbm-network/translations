@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Trouver un serveur",
+  name: "Rechercher un serveur",
 
   //---------------------------------------------------------------------
   // Action Section

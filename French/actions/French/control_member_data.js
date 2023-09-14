@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Données des membres de contrôle",
+  name: "Contrôle des données du membre",
 
   //---------------------------------------------------------------------
   // Action Section

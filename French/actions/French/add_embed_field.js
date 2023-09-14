@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Ajouter un champs d'intégration",
+  name: "Ajouter un champ d'intégration",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Messagerie",
+  section: "Message Intégrer",
 
   //---------------------------------------------------------------------
   // Action Subtitle

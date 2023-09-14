@@ -5,7 +5,7 @@ module.exports = {
   // This is the name of the action displayed in the editor.
   //---------------------------------------------------------------------
 
-  name: "Supprimer les messages en masse",
+  name: "Supprimer des messages en masse",
 
   //---------------------------------------------------------------------
   // Action Section
@@ -13,7 +13,7 @@ module.exports = {
   // This is the section the action will fall into.
   //---------------------------------------------------------------------
 
-  section: "Messagerie",
+  section: "Messages",
 
   //---------------------------------------------------------------------
   // Action Subtitle
